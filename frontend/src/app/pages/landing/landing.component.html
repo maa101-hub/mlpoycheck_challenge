@@ -1,0 +1,441 @@
+<!-- Navbar - Floating Glass Pill -->
+<nav class="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl">
+  <div class="bg-white/80 backdrop-blur-xl rounded-full px-6 py-3 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.08)] ring-1 ring-black/[0.04]">
+    <div class="flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center gap-2.5">
+        <img src="assets/image1.png" alt="Mploycheck Logo" class="w-8 h-8 rounded-lg object-contain">
+        <span class="text-lg font-bold text-gray-900 tracking-tight">Mploycheck</span>
+      </div>
+
+      <!-- Nav Links -->
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#" class="text-sm font-medium text-gray-900 relative after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[2px] after:bg-primary-700 after:rounded-full">Solutions</a>
+        <a href="#" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-all duration-500 ease-premium">Compliance</a>
+        <a href="#" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-all duration-500 ease-premium">About</a>
+      </div>
+
+      <!-- Right Side -->
+      <div class="flex items-center gap-3">
+        <div class="hidden lg:flex items-center bg-gray-100/80 rounded-full px-4 py-2 gap-2 ring-1 ring-black/[0.03]">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" placeholder="Search resources..." class="bg-transparent text-sm outline-none w-28 text-gray-600 placeholder:text-gray-400">
+        </div>
+        <a href="#" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-all duration-500 ease-premium hidden md:block">Help</a>
+        <a routerLink="/login" class="group bg-primary-700 text-white pl-5 pr-4 py-2.5 rounded-full text-sm font-semibold hover:bg-primary-800 transition-all duration-500 ease-premium inline-flex items-center gap-2">
+          Login
+          <span class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:translate-x-0.5 transition-transform duration-500 ease-premium">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="pt-32 pb-24 bg-white relative overflow-hidden">
+  <!-- Subtle background gradient -->
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/30 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3"></div>
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <!-- Left Content -->
+      <div class="fade-up">
+        <div class="inline-flex items-center gap-2 bg-primary-50/80 ring-1 ring-primary-200/60 rounded-full px-4 py-1.5 mb-8">
+          <svg class="w-3.5 h-3.5 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-[11px] font-semibold text-primary-700 uppercase tracking-[0.12em]">Enterprise Grade Compliance</span>
+        </div>
+
+        <h1 class="text-4xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] tracking-tight">
+          <span class="text-gray-900">Secure Enterprise</span><br>
+          <span class="text-primary-600">Employee</span><br>
+          <span class="text-primary-600">Verification</span>
+        </h1>
+
+        <p class="mt-7 text-gray-500 text-lg leading-relaxed max-w-md">
+          Streamline your institutional trust with Mploycheck. Our hyper-efficient verification platform ensures absolute accuracy, lightning speed, and total regulatory compliance for high-stakes enterprise environments.
+        </p>
+
+        <div class="flex flex-wrap gap-4 mt-10">
+          <a href="#" class="btn-primary group">
+            Get Started
+            <span class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center group-hover:translate-x-1 transition-transform duration-500 ease-premium">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </span>
+          </a>
+          <a href="#" class="btn-outline">Request Demo</a>
+        </div>
+      </div>
+
+      <!-- Right Content - Image Grid with Double-Bezel -->
+      <div class="relative fade-up" style="transition-delay: 150ms">
+        <div class="card-shell">
+          <div class="card-inner !p-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="space-y-3">
+                <div class="rounded-2xl overflow-hidden">
+                  <img src="assets/image.png" 
+                       alt="Professional employee verification" class="w-full h-52 object-cover">
+                  <div class="bg-primary-700 text-white px-4 py-2.5">
+                    <p class="text-xs font-semibold">Anita Collier</p>
+                    <p class="text-[11px] opacity-70">Global Talent Onboarding</p>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-3 pt-6">
+                <div class="rounded-2xl overflow-hidden">
+                  <img src="assets/image2.png" 
+                       alt="Verification process" class="w-full h-44 object-cover">
+                </div>
+                <div class="rounded-2xl overflow-hidden">
+                  <img src="assets/image3.png" 
+                       alt="Enterprise compliance" class="w-full h-32 object-cover">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Badge - Verified Today -->
+        <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-dark-900 text-white rounded-full pl-4 pr-5 py-2.5 flex items-center gap-3 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.3)] ring-1 ring-white/10">
+          <div class="flex items-center gap-2">
+            <div class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
+              <svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="text-sm font-medium">Verified Today</span>
+          </div>
+          <span class="text-primary-400 font-bold text-sm">1,284 Records</span>
+        </div>
+
+        <!-- Compliance Badge -->
+        <div class="absolute top-6 -right-3 bg-white rounded-xl shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)] px-4 py-2.5 ring-1 ring-black/[0.04]">
+          <p class="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Enterprise</p>
+          <p class="text-xs font-bold text-primary-700">SOC Compliance</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="grid grid-cols-3 gap-8 mt-20 pt-10 border-t border-gray-100/80">
+      <div class="fade-up">
+        <p class="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">489</p>
+        <p class="text-sm text-gray-400 mt-1.5 font-medium">Global Clients</p>
+      </div>
+      <div class="fade-up" style="transition-delay: 100ms">
+        <p class="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">97%</p>
+        <p class="text-sm text-gray-400 mt-1.5 font-medium">Accuracy Rate</p>
+      </div>
+      <div class="fade-up" style="transition-delay: 200ms">
+        <p class="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">&lt; 2hr</p>
+        <p class="text-sm text-gray-400 mt-1.5 font-medium">Turnaround Time</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Enterprise-Grade Performance Section -->
+<section class="py-28 bg-gray-50/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-20 fade-up">
+      <h2 class="section-title">Enterprise-Grade Performance</h2>
+      <p class="section-subtitle">
+        Mploycheck is built for scale, prioritizing the critical pillars of modern corporate background management.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5">
+      <!-- Card 1 - Double Bezel Architecture -->
+      <div class="card-shell fade-up">
+        <div class="card-inner">
+          <div class="w-11 h-11 bg-primary-50 rounded-xl flex items-center justify-center mb-6 ring-1 ring-primary-100/60">
+            <svg class="w-5 h-5 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-3 tracking-tight">Unmatched Accuracy</h3>
+          <p class="text-gray-500 text-sm leading-relaxed mb-6">
+            Multi-layered verification protocols and direct-source data integration eliminate the risk of critical errors in high-stakes auditing environments.
+          </p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-5 h-5 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-primary-700" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="text-sm text-primary-700 font-medium">Direct API Verification</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-5 h-5 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-primary-700" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="text-sm text-primary-700 font-medium">AI-Driven Discrepancy Detection</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card-shell fade-up" style="transition-delay: 100ms">
+        <div class="card-inner">
+          <div class="w-11 h-11 bg-primary-50 rounded-xl flex items-center justify-center mb-6 ring-1 ring-primary-100/60">
+            <svg class="w-5 h-5 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-3 tracking-tight">Operational Speed</h3>
+          <p class="text-gray-500 text-sm leading-relaxed mb-6">
+            Reduce verification turnaround from days to minutes. Our automated workflows bypass traditional bottlenecks for immediate decision-making.
+          </p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-5 h-5 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-primary-700" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="text-sm text-primary-700 font-medium">Real-time Issue Tracking</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-5 h-5 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-primary-700" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="text-sm text-primary-700 font-medium">Automated Queue Priority</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card-shell fade-up" style="transition-delay: 200ms">
+        <div class="card-inner">
+          <div class="w-11 h-11 bg-primary-50 rounded-xl flex items-center justify-center mb-6 ring-1 ring-primary-100/60">
+            <svg class="w-5 h-5 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-3 tracking-tight">Total Compliance</h3>
+          <p class="text-gray-500 text-sm leading-relaxed mb-6">
+            Pre-built frameworks for GDPR, SOC2, and regional labor laws ensure your data handling practices meet the highest global standards.
+          </p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-5 h-5 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-primary-700" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="text-sm text-primary-700 font-medium">Automated Audit Logging</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-5 h-5 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-primary-700" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="text-sm text-primary-700 font-medium">Secure Data Sovereignty</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trusted Partners Section -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center fade-up">
+    <p class="text-[13px] font-semibold text-gray-800 uppercase tracking-[0.35em] mb-12">
+      Powering Global Human Capital Infrastructure
+    </p>
+    <!-- Partner logos -->
+    <div class="flex justify-center items-center gap-8 flex-wrap">
+      <!-- Logo 1: Striped Sphere -->
+      <div class="w-20 h-20 bg-[#0d1117] rounded-xl flex items-center justify-center shadow-lg opacity-50 blur-[0.5px] hover:opacity-100 hover:blur-0 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-700 ease-premium cursor-pointer">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="18" fill="none" stroke="#2a2f38" stroke-width="0.5"/>
+          <ellipse cx="24" cy="24" rx="18" ry="18" fill="none"/>
+          <path d="M10 14C14 18 20 24 38 34" stroke="#c0c8d4" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+          <path d="M8 18C12 22 20 28 36 36" stroke="#8a94a2" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+          <path d="M7 22C11 26 19 32 34 38" stroke="#5a6370" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+          <path d="M12 10C16 14 22 20 40 30" stroke="#e0e6ed" stroke-width="2.8" stroke-linecap="round" opacity="0.95"/>
+          <path d="M14 8C18 12 24 18 40 26" stroke="#a0aab4" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+          <path d="M6 26C10 30 18 34 32 40" stroke="#3a4250" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+          <path d="M16 6C20 10 26 16 42 24" stroke="#6a7480" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+          <circle cx="24" cy="24" r="17.5" fill="none" stroke="#1a2030" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <!-- Logo 2: Globe/Sphere with diagonal lines -->
+      <div class="w-20 h-20 bg-[#0d1117] rounded-xl flex items-center justify-center shadow-lg opacity-50 blur-[0.5px] hover:opacity-100 hover:blur-0 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-700 ease-premium cursor-pointer">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="16" stroke="#3a4555" stroke-width="1"/>
+          <circle cx="22" cy="22" r="11" stroke="#3a4555" stroke-width="0.7"/>
+          <ellipse cx="22" cy="22" rx="16" ry="8" stroke="#4a5565" stroke-width="0.7" transform="rotate(-30 22 22)"/>
+          <ellipse cx="22" cy="22" rx="16" ry="8" stroke="#4a5565" stroke-width="0.7" transform="rotate(30 22 22)"/>
+          <ellipse cx="22" cy="22" rx="16" ry="8" stroke="#4a5565" stroke-width="0.7" transform="rotate(90 22 22)"/>
+          <circle cx="22" cy="22" r="3" fill="#6a7a8a" opacity="0.5"/>
+        </svg>
+      </div>
+
+      <!-- Logo 3: Shield/Crest -->
+      <div class="w-20 h-20 bg-[#0f1419] rounded-xl flex items-center justify-center shadow-lg opacity-50 blur-[0.5px] hover:opacity-100 hover:blur-0 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-700 ease-premium cursor-pointer">
+        <svg width="36" height="40" viewBox="0 0 36 40" fill="none">
+          <path d="M18 2L4 8V18C4 28 10 34 18 38C26 34 32 28 32 18V8L18 2Z" stroke="#8a9aaa" stroke-width="1.5" fill="none"/>
+          <path d="M18 6L8 10V18C8 26 12 30 18 34C24 30 28 26 28 18V10L18 6Z" stroke="#6a7a8a" stroke-width="1" fill="none"/>
+          <rect x="14" y="14" width="8" height="10" rx="1" stroke="#9aacbc" stroke-width="1.2" fill="none"/>
+          <path d="M16 14V12C16 10.9 16.9 10 18 10C19.1 10 20 10.9 20 12V14" stroke="#9aacbc" stroke-width="1.2"/>
+          <circle cx="18" cy="19" r="1.5" fill="#9aacbc"/>
+        </svg>
+      </div>
+
+      <!-- Logo 4: Concentric Circles / Target -->
+      <div class="w-20 h-20 bg-[#0a1218] rounded-xl flex items-center justify-center shadow-lg opacity-50 blur-[0.5px] hover:opacity-100 hover:blur-0 hover:shadow-[0_0_20px_rgba(74,202,222,0.2)] transition-all duration-700 ease-premium cursor-pointer">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="18" stroke="#1a4a5a" stroke-width="0.7" opacity="0.5"/>
+          <circle cx="22" cy="22" r="14" stroke="#1a6a7a" stroke-width="0.8" opacity="0.6"/>
+          <circle cx="22" cy="22" r="10" stroke="#2a8a9a" stroke-width="1" opacity="0.7"/>
+          <circle cx="22" cy="22" r="6" stroke="#3aaabc" stroke-width="1.2" opacity="0.8"/>
+          <circle cx="22" cy="22" r="2.5" fill="#4acade" opacity="0.9"/>
+          <line x1="22" y1="4" x2="22" y2="8" stroke="#2a7a8a" stroke-width="0.5" opacity="0.4"/>
+          <line x1="22" y1="36" x2="22" y2="40" stroke="#2a7a8a" stroke-width="0.5" opacity="0.4"/>
+          <line x1="4" y1="22" x2="8" y2="22" stroke="#2a7a8a" stroke-width="0.5" opacity="0.4"/>
+          <line x1="36" y1="22" x2="40" y2="22" stroke="#2a7a8a" stroke-width="0.5" opacity="0.4"/>
+        </svg>
+      </div>
+
+      <!-- Logo 5: Botanical/Crest on Teal -->
+      <div class="w-20 h-20 bg-[#1a5c5c] rounded-xl flex items-center justify-center shadow-lg opacity-50 blur-[0.5px] hover:opacity-100 hover:blur-0 hover:shadow-[0_0_20px_rgba(122,188,170,0.2)] transition-all duration-700 ease-premium cursor-pointer">
+        <svg width="36" height="40" viewBox="0 0 36 40" fill="none">
+          <line x1="18" y1="8" x2="18" y2="34" stroke="#7abcaa" stroke-width="1"/>
+          <path d="M18 12C14 14 12 18 14 22" stroke="#7abcaa" stroke-width="0.8" fill="none"/>
+          <path d="M18 12C22 14 24 18 22 22" stroke="#7abcaa" stroke-width="0.8" fill="none"/>
+          <path d="M18 18C15 20 13 23 15 26" stroke="#7abcaa" stroke-width="0.8" fill="none"/>
+          <path d="M18 18C21 20 23 23 21 26" stroke="#7abcaa" stroke-width="0.8" fill="none"/>
+          <path d="M18 24C16 26 15 28 16 30" stroke="#7abcaa" stroke-width="0.8" fill="none"/>
+          <path d="M18 24C20 26 21 28 20 30" stroke="#7abcaa" stroke-width="0.8" fill="none"/>
+          <circle cx="18" cy="9" r="2" stroke="#7abcaa" stroke-width="0.8" fill="none"/>
+          <text x="18" y="38" text-anchor="middle" fill="#7abcaa" font-size="4" font-family="sans-serif" letter-spacing="0.5">REINVENTEN</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-24">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="card-shell !rounded-[2rem] fade-up">
+      <div class="card-inner !rounded-[calc(2rem-0.375rem)] !p-0 overflow-hidden">
+        <div class="bg-gradient-to-br from-primary-700 via-primary-700 to-primary-900 px-8 md:px-16 py-20 text-center relative">
+          <!-- Subtle ambient glow -->
+          <div class="absolute top-0 left-1/4 w-64 h-64 bg-primary-400/20 rounded-full blur-[100px]"></div>
+          <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-primary-300/10 rounded-full blur-[120px]"></div>
+          
+          <div class="relative z-10">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight">
+              Ready to Secure Your Workforce?
+            </h2>
+            <p class="text-primary-100/80 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+              Join the world's most secure enterprises. Start your 14-day free trial or talk to an Mploycheck compliance specialist today.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+              <a href="#" class="btn-white group">
+                Start Free Trial
+              </a>
+              <a href="#" class="btn-outline-white">Speak with Sales</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark-900 text-white py-20 rounded-t-[2rem]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid md:grid-cols-5 gap-10">
+      <!-- Brand -->
+      <div class="md:col-span-2">
+        <div class="flex items-center gap-2.5 mb-5">
+          <img src="assets/image1.png" alt="Mploycheck Logo" class="w-8 h-8 rounded-lg object-contain">
+          <span class="text-xl font-bold tracking-tight">Mploycheck</span>
+        </div>
+        <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
+          The institutional choice for high-speed, high-accuracy employee verification management systems. Secure your hiring pipeline today.
+        </p>
+        <div class="flex items-center gap-3 mt-7">
+          <a href="#" class="w-9 h-9 bg-white/5 ring-1 ring-white/10 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-500 ease-premium">
+            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+          </a>
+          <a href="#" class="w-9 h-9 bg-white/5 ring-1 ring-white/10 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-500 ease-premium">
+            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <a href="#" class="w-9 h-9 bg-white/5 ring-1 ring-white/10 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-500 ease-premium">
+            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Product -->
+      <div>
+        <h4 class="font-semibold text-[11px] uppercase tracking-[0.15em] text-gray-500 mb-5">Product</h4>
+        <ul class="space-y-3.5">
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Features</a></li>
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Enterprise</a></li>
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Integrations</a></li>
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Security</a></li>
+        </ul>
+      </div>
+
+      <!-- Compliance -->
+      <div>
+        <h4 class="font-semibold text-[11px] uppercase tracking-[0.15em] text-gray-500 mb-5">Compliance</h4>
+        <ul class="space-y-3.5">
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">GDPR Portal</a></li>
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Audit Logs</a></li>
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Privacy Policy</a></li>
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Terms of Service</a></li>
+        </ul>
+      </div>
+
+      <!-- Company -->
+      <div>
+        <h4 class="font-semibold text-[11px] uppercase tracking-[0.15em] text-gray-500 mb-5">Company</h4>
+        <ul class="space-y-3.5">
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">About Us</a></li>
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Careers</a></li>
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Contact</a></li>
+          <li><a href="#" class="text-gray-400 text-sm hover:text-white transition-all duration-500 ease-premium">Press Kit</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="border-t border-white/10 mt-14 pt-8 flex flex-col md:flex-row justify-between items-center">
+      <p class="text-gray-500 text-sm">
+        &copy; 2024 Mploycheck. All rights reserved. A Subsidiary of Verification Global Corp.
+      </p>
+      <div class="flex items-center gap-6 mt-4 md:mt-0">
+        <a href="#" class="text-gray-500 text-sm hover:text-white transition-all duration-500 ease-premium">Legal Documentation</a>
+        <a href="#" class="text-gray-500 text-sm hover:text-white transition-all duration-500 ease-premium">SLA Agreements</a>
+      </div>
+    </div>
+  </div>
+</footer>
