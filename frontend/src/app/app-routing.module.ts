@@ -16,6 +16,7 @@ import { UserOverviewComponent } from './pages/user-overview/user-overview.compo
 import { UserSettingsComponent } from './pages/user-settings/user-settings.component';
 import { AccessRequestsComponent } from './pages/access-requests/access-requests.component';
 import { RequiredDocumentsComponent } from './pages/required-documents/required-documents.component';
+import { DocumentReviewComponent } from './pages/document-review/document-review.component';
 import { AuthGuard, AdminGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -29,6 +30,7 @@ const routes: Routes = [
   { path: 'team', component: TeamComponent, canActivate: [AdminGuard] },
   { path: 'access-requests', component: AccessRequestsComponent, canActivate: [AdminGuard] },
   { path: 'required-documents', component: RequiredDocumentsComponent, canActivate: [AdminGuard] },
+  { path: 'document-review', component: DocumentReviewComponent, canActivate: [AdminGuard] },
   { path: 'compliance', component: ComplianceComponent, canActivate: [AdminGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard] },
   { path: 'support', component: SupportComponent, canActivate: [AuthGuard] },
