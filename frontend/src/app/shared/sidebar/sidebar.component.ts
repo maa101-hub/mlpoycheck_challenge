@@ -18,12 +18,10 @@ export class SidebarComponent implements OnInit {
     { id: 'access-requests', label: 'Access Requests', icon: 'users', route: '/access-requests' },
     { id: 'required-documents', label: 'Required Docs', icon: 'clipboard', route: '/required-documents' },
     { id: 'document-review', label: 'Document Review', icon: 'shield', route: '/document-review' },
-    { id: 'compliance', label: 'Compliance', icon: 'clipboard', route: '/compliance' },
   ];
 
   bottomNavItems = [
     { id: 'settings', label: 'Settings', icon: 'settings', route: '/settings' },
-    { id: 'support', label: 'Support', icon: 'help', route: '/support' },
   ];
 
   constructor(private router: Router, private authService: AuthService) {}

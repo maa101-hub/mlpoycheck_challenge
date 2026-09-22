@@ -16,9 +16,7 @@ import { TopbarComponent } from './shared/topbar/topbar.component';
 import { TeamComponent } from './pages/team/team.component';
 import { VerificationsComponent } from './pages/verifications/verifications.component';
 import { ReportsComponent } from './pages/reports/reports.component';
-import { ComplianceComponent } from './pages/compliance/compliance.component';
 import { SettingsComponent } from './pages/settings/settings.component';
-import { SupportComponent } from './pages/support/support.component';
 import { UserDashboardComponent } from './pages/user-dashboard/user-dashboard.component';
 import { UserVerificationsComponent } from './pages/user-verifications/user-verifications.component';
 import { UserOverviewComponent } from './pages/user-overview/user-overview.component';
@@ -39,9 +37,7 @@ import { DocumentReviewComponent } from './pages/document-review/document-review
     TeamComponent,
     VerificationsComponent,
     ReportsComponent,
-    ComplianceComponent,
     SettingsComponent,
-    SupportComponent,
     UserDashboardComponent,
     UserVerificationsComponent,
     UserOverviewComponent,

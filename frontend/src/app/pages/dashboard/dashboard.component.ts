@@ -18,7 +18,7 @@ interface VerificationRecord {
 export class DashboardComponent implements OnInit {
   isLoading = true;
   userName = 'Administrator';
-  userRole = 'Chief Compliance Officer';
+  userRole = 'Administrator';
   verificationLog: VerificationRecord[] = [];
   summary = { totalRecords: 0, verified: 0, pending: 0, flagged: 0, rejected: 0 };
 
@@ -28,7 +28,7 @@ export class DashboardComponent implements OnInit {
     const user = this.authService.getUser();
     if (user) {
       this.userName = user.fullName;
-      this.userRole = user.role === 'admin' ? 'Chief Compliance Officer' : 'General User';
+      this.userRole = user.role === 'admin' ? 'Administrator' : 'General User';
     }
 
     // Fetch real records and summary from API

@@ -17,14 +17,8 @@ export class ReportsComponent implements OnInit {
   rejected = 0;
   statsError = '';
 
-  reports = [
-    { name: 'Monthly Verification Summary', type: 'PDF', date: '2024-03-15', size: '2.4 MB', status: 'ready' },
-    { name: 'Q1 Compliance Audit Report', type: 'PDF', date: '2024-03-10', size: '5.1 MB', status: 'ready' },
-    { name: 'Risk Assessment Overview', type: 'XLSX', date: '2024-03-08', size: '1.8 MB', status: 'ready' },
-    { name: 'Employee Onboarding Metrics', type: 'PDF', date: '2024-03-05', size: '3.2 MB', status: 'processing' },
-    { name: 'Annual Background Check Stats', type: 'PDF', date: '2024-02-28', size: '7.6 MB', status: 'ready' },
-    { name: 'Department-wise Verification', type: 'XLSX', date: '2024-02-25', size: '980 KB', status: 'ready' },
-  ];
+  isExporting = false;
+  exportError = '';
 
   constructor(private apiService: ApiService) {}
 
@@ -42,6 +36,44 @@ export class ReportsComponent implements OnInit {
       error: (err) => {
         this.statsError = err.error?.message || 'Could not load verification stats.';
         this.isLoading = false;
+      }
+    });
+  }
+
+  /**
+   * Build and download a real CSV of the company's employee verification data,
+   * generated on demand from the live backend list.
+   */
+  exportCsv(): void {
+    this.isExporting = true;
+    this.exportError = '';
+    this.apiService.getVerificationEmployees().subscribe({
+      next: (res) => {
+        const rows = res?.data || [];
+        const header = ['Employee', 'Email', 'Documents Verified', 'Documents Total', 'Status'];
+        const escape = (v: any) => {
+          const s = String(v ?? '');
+          return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const lines = [
+          header.join(','),
+          ...rows.map((r: any) =>
+            [r.employeeName, r.email, r.verified, r.total, r.status].map(escape).join(',')
+          ),
+        ];
+        const csv = lines.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `verification-report-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.isExporting = false;
+      },
+      error: (err) => {
+        this.isExporting = false;
+        this.exportError = err.error?.message || 'Could not generate the report.';
       }
     });
   }
