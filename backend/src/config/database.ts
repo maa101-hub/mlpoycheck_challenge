@@ -54,11 +54,30 @@ export interface DBDocument {
   id: string;
   userId: string;
   name: string;
-  type: 'passport' | 'degree' | 'employment_letter' | 'background_cert' | 'photo_id';
+  // A document type slug. Built-ins include photo_id/employment_letter/degree/
+  // background_cert, but companies can define their own required document types.
+  type: string;
   status: 'uploaded' | 'verified' | 'rejected';
   uploadedAt: string;
   size: string;
 }
+
+export interface DBRequiredDoc {
+  type: string;
+  label: string;
+  step: string;
+}
+
+/**
+ * Default required documents used when a company has not defined its own list.
+ * Keeps existing companies working and gives new companies a sensible start.
+ */
+export const DEFAULT_REQUIRED_DOCS: DBRequiredDoc[] = [
+  { type: 'photo_id', label: 'Photo ID / Passport', step: 'Identity Check' },
+  { type: 'employment_letter', label: 'Employment Letter', step: 'Employment Verification' },
+  { type: 'degree', label: 'Degree Certificate', step: 'Education Verification' },
+  { type: 'background_cert', label: 'Background Certificate', step: 'Background Check' },
+];
 
 // ─── Row mappers (snake_case columns → camelCase objects) ────────────────
 function mapUser(r: any): DBUser {
@@ -233,6 +252,59 @@ export class Database {
     return code;
   }
 
+  // ─── REQUIRED DOCUMENTS (per company) ───────────────────────────────
+  /**
+   * Returns a company's configured required documents. If the company has none
+   * defined (e.g. companies created before this feature), returns the defaults
+   * so verification still works.
+   */
+  static async getRequiredDocuments(companyId: string | null | undefined): Promise<DBRequiredDoc[]> {
+    if (!companyId) return DEFAULT_REQUIRED_DOCS;
+    const { rows } = await pool.query(
+      'SELECT doc_type, label, step FROM required_documents WHERE company_id = $1 ORDER BY created_at ASC',
+      [companyId]
+    );
+    if (rows.length === 0) return DEFAULT_REQUIRED_DOCS;
+    return rows.map(r => ({ type: r.doc_type, label: r.label, step: r.step }));
+  }
+
+  static async addRequiredDocument(companyId: string, docType: string, label: string, step: string): Promise<DBRequiredDoc> {
+    const id = this.generateId();
+    // Upsert so re-adding the same type updates its label instead of erroring.
+    const { rows } = await pool.query(
+      `INSERT INTO required_documents (id, company_id, doc_type, label, step, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
+       ON CONFLICT (company_id, doc_type) DO UPDATE SET label = EXCLUDED.label, step = EXCLUDED.step
+       RETURNING doc_type, label, step`,
+      [id, companyId, docType, label, step]
+    );
+    return { type: rows[0].doc_type, label: rows[0].label, step: rows[0].step };
+  }
+
+  static async deleteRequiredDocument(companyId: string, docType: string): Promise<boolean> {
+    const res = await pool.query(
+      'DELETE FROM required_documents WHERE company_id = $1 AND doc_type = $2',
+      [companyId, docType]
+    );
+    return (res.rowCount ?? 0) > 0;
+  }
+
+  /**
+   * Seed a company's required-documents list with the defaults. Called when a
+   * new company is registered. Safe to call more than once (ON CONFLICT).
+   */
+  static async seedDefaultRequiredDocs(companyId: string, client?: PoolClient): Promise<void> {
+    const runner = client || pool;
+    for (const d of DEFAULT_REQUIRED_DOCS) {
+      await runner.query(
+        `INSERT INTO required_documents (id, company_id, doc_type, label, step, created_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())
+         ON CONFLICT (company_id, doc_type) DO NOTHING`,
+        [this.generateId(), companyId, d.type, d.label, d.step]
+      );
+    }
+  }
+
   // ─── RECORDS ────────────────────────────────────────────────────────
   static async getRecords(): Promise<DBRecord[]> {
     const { rows } = await pool.query('SELECT * FROM records');
@@ -319,12 +391,9 @@ export class Database {
   }
 
   static async getVerificationProgress(userId: string): Promise<{ total: number; uploaded: number; verified: number; steps: any[] }> {
-    const requiredDocs = [
-      { type: 'photo_id', label: 'Photo ID / Passport', step: 'Identity Check' },
-      { type: 'employment_letter', label: 'Employment Letter', step: 'Employment Verification' },
-      { type: 'degree', label: 'Degree Certificate', step: 'Education Verification' },
-      { type: 'background_cert', label: 'Background Certificate', step: 'Background Check' },
-    ];
+    // Required documents are now defined per company (falls back to defaults).
+    const user = await this.getUserById(userId);
+    const requiredDocs = await this.getRequiredDocuments(user?.companyId);
 
     const userDocs = await this.getDocuments(userId);
 
@@ -403,6 +472,18 @@ export class Database {
         size        TEXT NOT NULL DEFAULT ''
       );
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS required_documents (
+        id         TEXT PRIMARY KEY,
+        company_id TEXT NOT NULL,
+        doc_type   TEXT NOT NULL,
+        label      TEXT NOT NULL,
+        step       TEXT NOT NULL DEFAULT '',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE (company_id, doc_type)
+      );
+    `);
   }
 
   /**
@@ -440,8 +521,9 @@ export class Database {
           `INSERT INTO companies (id, name, join_code, created_at) VALUES ($1, $2, $3, NOW())`,
           [c.id, c.name, c.joinCode]
         );
+        await this.seedDefaultRequiredDocs(c.id, client);
       }
-      console.log(`   ✅ Seeded ${companies.length} companies`);
+      console.log(`   ✅ Seeded ${companies.length} companies (with default required documents)`);
       for (const u of seedUsers) {
         await client.query(
           `INSERT INTO users (id, email, password, full_name, role, company_name, company_id, status, last_login, is_active, created_at)

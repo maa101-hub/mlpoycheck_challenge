@@ -67,14 +67,15 @@ export class UserDashboardComponent implements OnInit {
     this.uploadError = '';
     this.uploadSuccess = '';
 
-    // Generate a realistic file name
+    // Generate a realistic file name. Known built-in types get nicer names;
+    // any custom company-defined document falls back to a name from its label.
     const fileNames: any = {
       photo_id: 'National_ID_Scan.pdf',
       employment_letter: 'Employment_Verification_Letter.pdf',
       degree: 'Degree_Certificate.pdf',
       background_cert: 'Background_Check_Report.pdf',
     };
-    const fileName = fileNames[type] || `${label.replace(/\s/g, '_')}.pdf`;
+    const fileName = fileNames[type] || `${label.replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
 
     this.apiService.uploadDocument(type, fileName).subscribe({
       next: (res) => {

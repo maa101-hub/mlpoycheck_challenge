@@ -15,6 +15,7 @@ import { UserVerificationsComponent } from './pages/user-verifications/user-veri
 import { UserOverviewComponent } from './pages/user-overview/user-overview.component';
 import { UserSettingsComponent } from './pages/user-settings/user-settings.component';
 import { AccessRequestsComponent } from './pages/access-requests/access-requests.component';
+import { RequiredDocumentsComponent } from './pages/required-documents/required-documents.component';
 import { AuthGuard, AdminGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -27,6 +28,7 @@ const routes: Routes = [
   { path: 'reports', component: ReportsComponent, canActivate: [AdminGuard] },
   { path: 'team', component: TeamComponent, canActivate: [AdminGuard] },
   { path: 'access-requests', component: AccessRequestsComponent, canActivate: [AdminGuard] },
+  { path: 'required-documents', component: RequiredDocumentsComponent, canActivate: [AdminGuard] },
   { path: 'compliance', component: ComplianceComponent, canActivate: [AdminGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard] },
   { path: 'support', component: SupportComponent, canActivate: [AuthGuard] },

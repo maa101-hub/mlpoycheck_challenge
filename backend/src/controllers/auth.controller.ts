@@ -108,6 +108,8 @@ export class AuthController {
           return;
         }
         const company = await Database.createCompany(companyName);
+        // Give the new company a sensible default required-documents list.
+        await Database.seedDefaultRequiredDocs(company.id);
         const admin = await Database.createUser({
           email: email.toLowerCase(),
           password: hashedPassword,

@@ -16,6 +16,7 @@ export class SidebarComponent implements OnInit {
     { id: 'reports', label: 'Reports', icon: 'chart', route: '/reports' },
     { id: 'team', label: 'Team', icon: 'users', route: '/team' },
     { id: 'access-requests', label: 'Access Requests', icon: 'users', route: '/access-requests' },
+    { id: 'required-documents', label: 'Required Docs', icon: 'clipboard', route: '/required-documents' },
     { id: 'compliance', label: 'Compliance', icon: 'clipboard', route: '/compliance' },
   ];
 
