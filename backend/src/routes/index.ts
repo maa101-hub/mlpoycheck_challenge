@@ -13,7 +13,8 @@ router.use('/users', userRoutes);
 router.use('/records', recordRoutes);
 router.use('/documents', documentRoutes);
 
-// Public registration (no auth required)
-router.post('/register', simulateDelay(1000), UserController.create as any);
+// Public registration (no auth required). Uses the dedicated register handler,
+// which forces role='general' so callers cannot self-register as admin.
+router.post('/register', simulateDelay(1000), UserController.register);
 
 export default router;

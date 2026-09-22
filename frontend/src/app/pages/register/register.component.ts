@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -15,7 +15,7 @@ export class RegisterComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) {}
+  constructor(private fb: FormBuilder, private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.registerForm = this.fb.group({
@@ -43,11 +43,7 @@ export class RegisterComponent implements OnInit {
 
     const { fullName, companyName, email, password } = this.registerForm.value;
 
-    this.http.post<any>('http://localhost:3000/api/register', {
-      fullName, companyName, email, password, role: 'general'
-    }, {
-      headers: { 'Content-Type': 'application/json' }
-    }).subscribe({
+    this.authService.register({ fullName, companyName, email, password }).subscribe({
       next: () => {
         this.isLoading = false;
         this.successMessage = 'Account created successfully! Redirecting to login...';
@@ -55,7 +51,7 @@ export class RegisterComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Registration failed. Please try again.';
+        this.errorMessage = err?.message || err?.error?.message || 'Registration failed. Please try again.';
       }
     });
   }

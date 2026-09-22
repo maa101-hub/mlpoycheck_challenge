@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-reports',
@@ -7,6 +8,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ReportsComponent implements OnInit {
   isLoading = true;
+
+  // Live verification stats sourced from the backend records summary.
+  totalRecords = 0;
+  verified = 0;
+  pending = 0;
+  flagged = 0;
+  rejected = 0;
+  statsError = '';
 
   reports = [
     { name: 'Monthly Verification Summary', type: 'PDF', date: '2024-03-15', size: '2.4 MB', status: 'ready' },
@@ -17,9 +26,23 @@ export class ReportsComponent implements OnInit {
     { name: 'Department-wise Verification', type: 'XLSX', date: '2024-02-25', size: '980 KB', status: 'ready' },
   ];
 
-  constructor() {}
+  constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
-    setTimeout(() => { this.isLoading = false; }, 1400);
+    this.apiService.getRecordsSummary().subscribe({
+      next: (res) => {
+        const d = res?.data || {};
+        this.totalRecords = d.totalRecords ?? 0;
+        this.verified = d.verified ?? 0;
+        this.pending = d.pending ?? 0;
+        this.flagged = d.flagged ?? 0;
+        this.rejected = d.rejected ?? 0;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.statsError = err.error?.message || 'Could not load verification stats.';
+        this.isLoading = false;
+      }
+    });
   }
 }

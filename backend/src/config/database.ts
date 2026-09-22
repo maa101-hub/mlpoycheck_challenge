@@ -1,22 +1,22 @@
-import fs from 'fs';
-import path from 'path';
+import { Pool, PoolClient } from 'pg';
 import bcrypt from 'bcryptjs';
+import { config } from './index';
 
 /**
- * JSON File-based Database
- * Stores users and records in local JSON files
- * Works without MongoDB installation
+ * PostgreSQL data layer (Neon-compatible).
+ * Replaces the previous JSON-file storage so data persists across
+ * restarts/redeploys on hosts with an ephemeral filesystem (e.g. Render).
+ *
+ * The public `Database` class keeps the same method names as before, but every
+ * method is now async (returns a Promise) because it talks to Postgres.
  */
 
-const DB_DIR = path.join(__dirname, '../../data');
-const USERS_FILE = path.join(DB_DIR, 'users.json');
-const RECORDS_FILE = path.join(DB_DIR, 'records.json');
-const DOCS_FILE = path.join(DB_DIR, 'documents.json');
-
-// Ensure data directory exists
-if (!fs.existsSync(DB_DIR)) {
-  fs.mkdirSync(DB_DIR, { recursive: true });
-}
+// Neon (and most managed Postgres) require SSL. rejectUnauthorized:false is the
+// standard setting for these providers' connection strings.
+const pool = new Pool({
+  connectionString: config.databaseUrl,
+  ssl: config.databaseSsl ? { rejectUnauthorized: false } : undefined,
+});
 
 export interface DBUser {
   id: string;
@@ -51,97 +51,153 @@ export interface DBDocument {
   size: string;
 }
 
-/**
- * Read JSON file
- */
-function readJSON<T>(filePath: string): T[] {
-  if (!fs.existsSync(filePath)) return [];
-  const data = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(data);
+// ─── Row mappers (snake_case columns → camelCase objects) ────────────────
+function mapUser(r: any): DBUser {
+  return {
+    id: r.id,
+    email: r.email,
+    password: r.password,
+    fullName: r.full_name,
+    role: r.role,
+    companyName: r.company_name,
+    lastLogin: r.last_login ? new Date(r.last_login).toISOString() : null,
+    isActive: r.is_active,
+    createdAt: new Date(r.created_at).toISOString(),
+  };
+}
+
+function mapRecord(r: any): DBRecord {
+  return {
+    id: r.id,
+    employeeName: r.employee_name,
+    department: r.department,
+    verificationStatus: r.verification_status,
+    riskLevel: r.risk_level,
+    lastUpdated: r.last_updated,
+    employeeId: r.employee_id,
+    position: r.position,
+  };
+}
+
+function mapDocument(r: any): DBDocument {
+  return {
+    id: r.id,
+    userId: r.user_id,
+    name: r.name,
+    type: r.type,
+    status: r.status,
+    uploadedAt: new Date(r.uploaded_at).toISOString(),
+    size: r.size,
+  };
 }
 
 /**
- * Write JSON file
- */
-function writeJSON<T>(filePath: string, data: T[]): void {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-/**
- * Database class with CRUD operations
+ * Database class with CRUD operations (all async).
  */
 export class Database {
   // ─── USERS ──────────────────────────────────────────────────────────
-  static getUsers(): DBUser[] {
-    return readJSON<DBUser>(USERS_FILE);
+  static async getUsers(): Promise<DBUser[]> {
+    const { rows } = await pool.query('SELECT * FROM users ORDER BY created_at ASC');
+    return rows.map(mapUser);
   }
 
-  static getUserById(id: string): DBUser | undefined {
-    return this.getUsers().find(u => u.id === id);
+  static async getUserById(id: string): Promise<DBUser | undefined> {
+    const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    return rows[0] ? mapUser(rows[0]) : undefined;
   }
 
-  static getUserByEmail(email: string): DBUser | undefined {
-    return this.getUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
+  static async getUserByEmail(email: string): Promise<DBUser | undefined> {
+    const { rows } = await pool.query('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [email]);
+    return rows[0] ? mapUser(rows[0]) : undefined;
   }
 
-  static createUser(user: Omit<DBUser, 'id' | 'createdAt'>): DBUser {
-    const users = this.getUsers();
-    const newUser: DBUser = {
-      ...user,
-      id: this.generateId(),
-      createdAt: new Date().toISOString(),
+  static async createUser(user: Omit<DBUser, 'id' | 'createdAt'>): Promise<DBUser> {
+    const id = this.generateId();
+    const { rows } = await pool.query(
+      `INSERT INTO users (id, email, password, full_name, role, company_name, last_login, is_active, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+       RETURNING *`,
+      [id, user.email, user.password, user.fullName, user.role, user.companyName, user.lastLogin, user.isActive]
+    );
+    return mapUser(rows[0]);
+  }
+
+  static async updateUser(id: string, updates: Partial<DBUser>): Promise<DBUser | null> {
+    // Map allowed fields to columns; build a dynamic SET clause.
+    const columnMap: Record<string, string> = {
+      email: 'email',
+      password: 'password',
+      fullName: 'full_name',
+      role: 'role',
+      companyName: 'company_name',
+      lastLogin: 'last_login',
+      isActive: 'is_active',
     };
-    users.push(newUser);
-    writeJSON(USERS_FILE, users);
-    return newUser;
+
+    const sets: string[] = [];
+    const values: any[] = [];
+    let i = 1;
+    for (const [key, column] of Object.entries(columnMap)) {
+      if (key in updates) {
+        sets.push(`${column} = $${i++}`);
+        values.push((updates as any)[key]);
+      }
+    }
+
+    if (sets.length === 0) {
+      return this.getUserById(id).then(u => u ?? null);
+    }
+
+    values.push(id);
+    const { rows } = await pool.query(
+      `UPDATE users SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`,
+      values
+    );
+    return rows[0] ? mapUser(rows[0]) : null;
   }
 
-  static updateUser(id: string, updates: Partial<DBUser>): DBUser | null {
-    const users = this.getUsers();
-    const index = users.findIndex(u => u.id === id);
-    if (index === -1) return null;
-    users[index] = { ...users[index], ...updates };
-    writeJSON(USERS_FILE, users);
-    return users[index];
-  }
-
-  static deleteUser(id: string): boolean {
-    const users = this.getUsers();
-    const filtered = users.filter(u => u.id !== id);
-    if (filtered.length === users.length) return false;
-    writeJSON(USERS_FILE, filtered);
-    return true;
+  static async deleteUser(id: string): Promise<boolean> {
+    const res = await pool.query('DELETE FROM users WHERE id = $1', [id]);
+    return (res.rowCount ?? 0) > 0;
   }
 
   // ─── RECORDS ────────────────────────────────────────────────────────
-  static getRecords(): DBRecord[] {
-    return readJSON<DBRecord>(RECORDS_FILE);
+  static async getRecords(): Promise<DBRecord[]> {
+    const { rows } = await pool.query('SELECT * FROM records');
+    return rows.map(mapRecord);
   }
 
-  static getRecordById(id: string): DBRecord | undefined {
-    return this.getRecords().find(r => r.id === id);
+  static async getRecordById(id: string): Promise<DBRecord | undefined> {
+    const { rows } = await pool.query('SELECT * FROM records WHERE id = $1', [id]);
+    return rows[0] ? mapRecord(rows[0]) : undefined;
   }
 
   // ─── DOCUMENTS ──────────────────────────────────────────────────────
-  static getDocuments(userId?: string): DBDocument[] {
-    const docs = readJSON<DBDocument>(DOCS_FILE);
-    if (userId) return docs.filter(d => d.userId === userId);
-    return docs;
+  static async getDocuments(userId?: string): Promise<DBDocument[]> {
+    if (userId) {
+      const { rows } = await pool.query('SELECT * FROM documents WHERE user_id = $1', [userId]);
+      return rows.map(mapDocument);
+    }
+    const { rows } = await pool.query('SELECT * FROM documents');
+    return rows.map(mapDocument);
   }
 
-  static addDocument(doc: Omit<DBDocument, 'id' | 'uploadedAt'>): DBDocument {
-    const docs = this.getDocuments();
-    const newDoc: DBDocument = {
-      ...doc,
-      id: this.generateId(),
-      uploadedAt: new Date().toISOString(),
-    };
-    docs.push(newDoc);
-    writeJSON(DOCS_FILE, docs);
-    return newDoc;
+  static async addDocument(doc: Omit<DBDocument, 'id' | 'uploadedAt'>): Promise<DBDocument> {
+    const id = this.generateId();
+    const { rows } = await pool.query(
+      `INSERT INTO documents (id, user_id, name, type, status, uploaded_at, size)
+       VALUES ($1, $2, $3, $4, $5, NOW(), $6)
+       RETURNING *`,
+      [id, doc.userId, doc.name, doc.type, doc.status, doc.size]
+    );
+    return mapDocument(rows[0]);
   }
 
-  static getVerificationProgress(userId: string): { total: number; uploaded: number; verified: number; steps: any[] } {
+  static async updateDocumentStatus(id: string, status: DBDocument['status']): Promise<void> {
+    await pool.query('UPDATE documents SET status = $1 WHERE id = $2', [status, id]);
+  }
+
+  static async getVerificationProgress(userId: string): Promise<{ total: number; uploaded: number; verified: number; steps: any[] }> {
     const requiredDocs = [
       { type: 'photo_id', label: 'Photo ID / Passport', step: 'Identity Check' },
       { type: 'employment_letter', label: 'Employment Letter', step: 'Employment Verification' },
@@ -149,7 +205,7 @@ export class Database {
       { type: 'background_cert', label: 'Background Certificate', step: 'Background Check' },
     ];
 
-    const userDocs = this.getDocuments(userId);
+    const userDocs = await this.getDocuments(userId);
 
     const steps = requiredDocs.map(req => {
       const doc = userDocs.find(d => d.type === req.type);
@@ -171,65 +227,78 @@ export class Database {
   }
 
   /**
-   * Seed initial data if database is empty
+   * Create tables if they don't exist yet.
+   */
+  static async initSchema(): Promise<void> {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id           TEXT PRIMARY KEY,
+        email        TEXT UNIQUE NOT NULL,
+        password     TEXT NOT NULL,
+        full_name    TEXT NOT NULL,
+        role         TEXT NOT NULL DEFAULT 'general',
+        company_name TEXT NOT NULL DEFAULT '',
+        last_login   TIMESTAMPTZ,
+        is_active    BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS records (
+        id                  TEXT PRIMARY KEY,
+        employee_name       TEXT NOT NULL,
+        department          TEXT NOT NULL,
+        verification_status TEXT NOT NULL,
+        risk_level          TEXT NOT NULL,
+        last_updated        TEXT NOT NULL,
+        employee_id         TEXT NOT NULL,
+        position            TEXT NOT NULL
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS documents (
+        id          TEXT PRIMARY KEY,
+        user_id     TEXT NOT NULL,
+        name        TEXT NOT NULL,
+        type        TEXT NOT NULL,
+        status      TEXT NOT NULL,
+        uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        size        TEXT NOT NULL DEFAULT ''
+      );
+    `);
+  }
+
+  /**
+   * Seed initial data if the database is empty.
    */
   static async seedIfEmpty(): Promise<void> {
-    const users = this.getUsers();
-    if (users.length === 0) {
-      console.log('📦 Seeding database with initial data...');
+    const { rows } = await pool.query('SELECT COUNT(*)::int AS count FROM users');
+    if (rows[0].count > 0) return;
 
-      // Seed users
-      const salt = await bcrypt.genSalt(10);
-      const seedUsers: DBUser[] = [
-        {
-          id: this.generateId(),
-          email: 'admin@mploycheck.com',
-          password: await bcrypt.hash('Admin@123', salt),
-          fullName: 'Sarah Mitchell',
-          role: 'admin',
-          companyName: 'Mploycheck Corp',
-          lastLogin: null,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: this.generateId(),
-          email: 'user@mploycheck.com',
-          password: await bcrypt.hash('User@123', salt),
-          fullName: 'James Wilson',
-          role: 'general',
-          companyName: 'Mploycheck Corp',
-          lastLogin: null,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: this.generateId(),
-          email: 'hr@enterprise.com',
-          password: await bcrypt.hash('Hr@12345', salt),
-          fullName: 'Emily Rodriguez',
-          role: 'general',
-          companyName: 'Enterprise Solutions Inc',
-          lastLogin: null,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: this.generateId(),
-          email: 'manager@techcorp.com',
-          password: await bcrypt.hash('Manager@1', salt),
-          fullName: 'David Chen',
-          role: 'admin',
-          companyName: 'TechCorp Global',
-          lastLogin: null,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        },
-      ];
-      writeJSON(USERS_FILE, seedUsers);
+    console.log('📦 Seeding database with initial data...');
+
+    const salt = await bcrypt.genSalt(10);
+    const seedUsers: Array<Omit<DBUser, 'createdAt'>> = [
+      { id: this.generateId(), email: 'admin@mploycheck.com', password: await bcrypt.hash('Admin@123', salt), fullName: 'Sarah Mitchell', role: 'admin', companyName: 'Mploycheck Corp', lastLogin: null, isActive: true },
+      { id: this.generateId(), email: 'user@mploycheck.com', password: await bcrypt.hash('User@123', salt), fullName: 'James Wilson', role: 'general', companyName: 'Mploycheck Corp', lastLogin: null, isActive: true },
+      { id: this.generateId(), email: 'hr@enterprise.com', password: await bcrypt.hash('Hr@12345', salt), fullName: 'Emily Rodriguez', role: 'general', companyName: 'Enterprise Solutions Inc', lastLogin: null, isActive: true },
+      { id: this.generateId(), email: 'manager@techcorp.com', password: await bcrypt.hash('Manager@1', salt), fullName: 'David Chen', role: 'admin', companyName: 'TechCorp Global', lastLogin: null, isActive: true },
+    ];
+
+    const client: PoolClient = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      for (const u of seedUsers) {
+        await client.query(
+          `INSERT INTO users (id, email, password, full_name, role, company_name, last_login, is_active, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
+          [u.id, u.email, u.password, u.fullName, u.role, u.companyName, u.lastLogin, u.isActive]
+        );
+      }
       console.log(`   ✅ Seeded ${seedUsers.length} users`);
 
-      // Seed records
       const seedRecords: DBRecord[] = [
         { id: this.generateId(), employeeName: 'Michael Thompson', department: 'Engineering', verificationStatus: 'verified', riskLevel: 'low', lastUpdated: '2024-03-15', employeeId: 'EMP-001', position: 'Senior Software Engineer' },
         { id: this.generateId(), employeeName: 'Jessica Martinez', department: 'Finance', verificationStatus: 'verified', riskLevel: 'low', lastUpdated: '2024-03-14', employeeId: 'EMP-002', position: 'Financial Analyst' },
@@ -252,15 +321,31 @@ export class Database {
         { id: this.generateId(), employeeName: 'Ryan Mitchell', department: 'Sales', verificationStatus: 'verified', riskLevel: 'low', lastUpdated: '2024-02-25', employeeId: 'EMP-019', position: 'Account Executive' },
         { id: this.generateId(), employeeName: 'Emma Taylor', department: 'Engineering', verificationStatus: 'pending', riskLevel: 'medium', lastUpdated: '2024-02-24', employeeId: 'EMP-020', position: 'QA Engineer' },
       ];
-      writeJSON(RECORDS_FILE, seedRecords);
+      for (const r of seedRecords) {
+        await client.query(
+          `INSERT INTO records (id, employee_name, department, verification_status, risk_level, last_updated, employee_id, position)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [r.id, r.employeeName, r.department, r.verificationStatus, r.riskLevel, r.lastUpdated, r.employeeId, r.position]
+        );
+      }
+      await client.query('COMMIT');
       console.log(`   ✅ Seeded ${seedRecords.length} records`);
       console.log('   📌 Login: admin@mploycheck.com / Admin@123');
       console.log('   📌 Login: user@mploycheck.com / User@123\n');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
     }
   }
 }
 
 export const connectDatabase = async (): Promise<void> => {
+  if (!config.databaseUrl) {
+    throw new Error('DATABASE_URL is not set. Provide a Postgres connection string (e.g. from Neon).');
+  }
+  await Database.initSchema();
   await Database.seedIfEmpty();
-  console.log('✅ JSON Database ready');
+  console.log('✅ PostgreSQL database ready');
 };

@@ -17,7 +17,7 @@ export class AuthController {
         return;
       }
 
-      const user = Database.getUserByEmail(email);
+      const user = await Database.getUserByEmail(email);
       if (!user) {
         res.status(401).json({ success: false, message: 'Invalid credentials.' });
         return;
@@ -35,7 +35,7 @@ export class AuthController {
       }
 
       // Update last login
-      Database.updateUser(user.id, { lastLogin: new Date().toISOString() });
+      await Database.updateUser(user.id, { lastLogin: new Date().toISOString() });
 
       // Generate JWT
       const token = jwt.sign(

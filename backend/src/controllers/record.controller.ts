@@ -9,7 +9,7 @@ export class RecordController {
   static async getAll(req: AuthRequest, res: Response): Promise<void> {
     const { search, status, riskLevel, sortBy = 'lastUpdated', sortOrder = 'desc', page = '1', limit = '10' } = req.query;
 
-    let records = Database.getRecords();
+    let records = await Database.getRecords();
 
     // Search filter
     if (search) {
@@ -50,7 +50,7 @@ export class RecordController {
   }
 
   static async getSummary(req: AuthRequest, res: Response): Promise<void> {
-    const records = Database.getRecords();
+    const records = await Database.getRecords();
     res.status(200).json({
       success: true,
       data: {
