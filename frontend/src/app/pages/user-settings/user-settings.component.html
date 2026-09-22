@@ -46,12 +46,12 @@
       </div>
       <div *ngIf="!isLoading">
         <div class="mb-8">
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Security & Privacy</h1>
-          <p class="text-gray-500 text-sm mt-1.5">Manage your password, two-factor authentication, and privacy preferences.</p>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Security</h1>
+          <p class="text-gray-500 text-sm mt-1.5">Manage your account password.</p>
         </div>
 
         <div class="grid grid-cols-12 gap-6">
-          <div class="col-span-12 lg:col-span-8">
+          <div class="col-span-12 lg:col-span-8 lg:col-start-3">
             <!-- Password -->
             <div class="bg-white/70 rounded-[1.5rem] p-1.5 ring-1 ring-black/[0.04] mb-6">
               <div class="bg-white rounded-[calc(1.5rem-0.375rem)] p-6">
@@ -66,50 +66,6 @@
                   <button type="submit" [disabled]="isSaving" class="px-6 py-3 rounded-xl bg-primary-700 text-white text-sm font-semibold hover:bg-primary-800 active:scale-[0.98] transition-all duration-500 mt-2 disabled:opacity-60">{{ isSaving ? 'Updating...' : 'Update Password' }}</button>
                 </div>
                 </form>
-              </div>
-            </div>
-            <!-- 2FA -->
-            <div class="bg-white/70 rounded-[1.5rem] p-1.5 ring-1 ring-black/[0.04]">
-              <div class="bg-white rounded-[calc(1.5rem-0.375rem)] p-6">
-                <div class="flex items-center justify-between mb-5">
-                  <div>
-                    <h2 class="text-base font-bold text-gray-900 tracking-tight">Two-Factor Authentication</h2>
-                    <p class="text-xs text-gray-500 mt-1">Add an extra layer of security to your account.</p>
-                  </div>
-                  <span class="inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60">Enabled</span>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-4 ring-1 ring-black/[0.03]">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div class="w-9 h-9 bg-primary-50 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg></div>
-                      <div><p class="text-sm font-medium text-gray-800">Authenticator App</p><p class="text-xs text-gray-400">Google Authenticator configured</p></div>
-                    </div>
-                    <button class="text-sm font-medium text-primary-700 hover:text-primary-800 transition-colors">Reconfigure</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Column -->
-          <div class="col-span-12 lg:col-span-4">
-            <div class="bg-white/70 rounded-[1.5rem] p-1.5 ring-1 ring-black/[0.04] mb-5">
-              <div class="bg-white rounded-[calc(1.5rem-0.375rem)] p-6">
-                <h3 class="text-sm font-bold text-gray-900 mb-4">Privacy Controls</h3>
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between"><span class="text-sm text-gray-600">Profile visible to HR</span><div class="w-10 h-5 bg-primary-600 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm"></div></div></div>
-                  <div class="flex items-center justify-between"><span class="text-sm text-gray-600">Show email to team</span><div class="w-10 h-5 bg-gray-200 rounded-full relative"><div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm"></div></div></div>
-                  <div class="flex items-center justify-between"><span class="text-sm text-gray-600">Activity log visible</span><div class="w-10 h-5 bg-primary-600 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm"></div></div></div>
-                </div>
-              </div>
-            </div>
-            <div class="bg-white/70 rounded-[1.5rem] p-1.5 ring-1 ring-black/[0.04]">
-              <div class="bg-white rounded-[calc(1.5rem-0.375rem)] p-6">
-                <h3 class="text-sm font-bold text-gray-900 mb-3">Active Sessions</h3>
-                <div class="space-y-3">
-                  <div class="flex items-center justify-between"><div><p class="text-sm text-gray-800 font-medium">Chrome — Windows</p><p class="text-xs text-gray-400">Current session</p></div><span class="w-2 h-2 rounded-full bg-emerald-500"></span></div>
-                  <div class="flex items-center justify-between"><div><p class="text-sm text-gray-800 font-medium">Safari — iPhone</p><p class="text-xs text-gray-400">Last active 2h ago</p></div><button class="text-xs text-red-500 font-medium">Revoke</button></div>
-                </div>
               </div>
             </div>
           </div>

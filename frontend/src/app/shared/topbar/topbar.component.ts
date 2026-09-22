@@ -8,7 +8,6 @@ import { AuthService, User } from '../../services/auth.service';
 })
 export class TopbarComponent implements OnInit {
   userName = 'Admin User';
-  userCode = '#SYS-882';
 
   constructor(private authService: AuthService) {}
 
@@ -17,6 +16,10 @@ export class TopbarComponent implements OnInit {
     if (user) {
       this.userName = user.fullName;
     }
+  }
+
+  get initial(): string {
+    return (this.userName || '?').charAt(0).toUpperCase();
   }
 
   logout(): void {
