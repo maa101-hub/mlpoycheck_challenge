@@ -172,6 +172,55 @@ export class Database {
     return rows[0] ? mapRecord(rows[0]) : undefined;
   }
 
+  static async createRecord(record: Omit<DBRecord, 'id'>): Promise<DBRecord> {
+    const id = this.generateId();
+    const { rows } = await pool.query(
+      `INSERT INTO records (id, employee_name, department, verification_status, risk_level, last_updated, employee_id, position)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING *`,
+      [id, record.employeeName, record.department, record.verificationStatus, record.riskLevel, record.lastUpdated, record.employeeId, record.position]
+    );
+    return mapRecord(rows[0]);
+  }
+
+  static async updateRecord(id: string, updates: Partial<DBRecord>): Promise<DBRecord | null> {
+    const columnMap: Record<string, string> = {
+      employeeName: 'employee_name',
+      department: 'department',
+      verificationStatus: 'verification_status',
+      riskLevel: 'risk_level',
+      lastUpdated: 'last_updated',
+      employeeId: 'employee_id',
+      position: 'position',
+    };
+
+    const sets: string[] = [];
+    const values: any[] = [];
+    let i = 1;
+    for (const [key, column] of Object.entries(columnMap)) {
+      if (key in updates) {
+        sets.push(`${column} = $${i++}`);
+        values.push((updates as any)[key]);
+      }
+    }
+
+    if (sets.length === 0) {
+      return this.getRecordById(id).then(r => r ?? null);
+    }
+
+    values.push(id);
+    const { rows } = await pool.query(
+      `UPDATE records SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`,
+      values
+    );
+    return rows[0] ? mapRecord(rows[0]) : null;
+  }
+
+  static async deleteRecord(id: string): Promise<boolean> {
+    const res = await pool.query('DELETE FROM records WHERE id = $1', [id]);
+    return (res.rowCount ?? 0) > 0;
+  }
+
   // ─── DOCUMENTS ──────────────────────────────────────────────────────
   static async getDocuments(userId?: string): Promise<DBDocument[]> {
     if (userId) {

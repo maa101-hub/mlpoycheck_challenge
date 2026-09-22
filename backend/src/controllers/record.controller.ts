@@ -62,4 +62,88 @@ export class RecordController {
       },
     });
   }
+
+  private static readonly VALID_STATUSES = ['verified', 'pending', 'flagged', 'rejected'];
+  private static readonly VALID_RISKS = ['low', 'medium', 'high', 'critical'];
+
+  private static today(): string {
+    return new Date().toISOString().slice(0, 10); // YYYY-MM-DD, matches seeded format
+  }
+
+  static async create(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { employeeName, department, employeeId, position, verificationStatus, riskLevel } = req.body;
+
+      if (!employeeName || !department || !employeeId || !position) {
+        res.status(400).json({ success: false, message: 'employeeName, department, employeeId and position are required.' });
+        return;
+      }
+
+      const status = verificationStatus || 'pending';
+      const risk = riskLevel || 'low';
+      if (!RecordController.VALID_STATUSES.includes(status)) {
+        res.status(400).json({ success: false, message: 'Invalid verificationStatus.' });
+        return;
+      }
+      if (!RecordController.VALID_RISKS.includes(risk)) {
+        res.status(400).json({ success: false, message: 'Invalid riskLevel.' });
+        return;
+      }
+
+      const record = await Database.createRecord({
+        employeeName,
+        department,
+        employeeId,
+        position,
+        verificationStatus: status,
+        riskLevel: risk,
+        lastUpdated: RecordController.today(),
+      });
+
+      res.status(201).json({ success: true, message: 'Record created.', data: record });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Failed to create record.' });
+    }
+  }
+
+  static async update(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const id = req.params.id as string;
+      const existing = await Database.getRecordById(id);
+      if (!existing) { res.status(404).json({ success: false, message: 'Record not found.' }); return; }
+
+      const { employeeName, department, employeeId, position, verificationStatus, riskLevel } = req.body;
+      const updates: any = { lastUpdated: RecordController.today() };
+
+      if (employeeName !== undefined) updates.employeeName = employeeName;
+      if (department !== undefined) updates.department = department;
+      if (employeeId !== undefined) updates.employeeId = employeeId;
+      if (position !== undefined) updates.position = position;
+      if (verificationStatus !== undefined) {
+        if (!RecordController.VALID_STATUSES.includes(verificationStatus)) {
+          res.status(400).json({ success: false, message: 'Invalid verificationStatus.' });
+          return;
+        }
+        updates.verificationStatus = verificationStatus;
+      }
+      if (riskLevel !== undefined) {
+        if (!RecordController.VALID_RISKS.includes(riskLevel)) {
+          res.status(400).json({ success: false, message: 'Invalid riskLevel.' });
+          return;
+        }
+        updates.riskLevel = riskLevel;
+      }
+
+      const updated = await Database.updateRecord(id, updates);
+      res.status(200).json({ success: true, message: 'Record updated.', data: updated });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Failed to update record.' });
+    }
+  }
+
+  static async remove(req: AuthRequest, res: Response): Promise<void> {
+    const deleted = await Database.deleteRecord(req.params.id as string);
+    if (!deleted) { res.status(404).json({ success: false, message: 'Record not found.' }); return; }
+    res.status(200).json({ success: true, message: 'Record deleted.' });
+  }
 }
