@@ -1,0 +1,71 @@
+<div class="flex min-h-screen bg-[#f8f9fb]">
+  <app-sidebar></app-sidebar>
+  <div class="flex-1 ml-[220px] flex flex-col">
+    <app-topbar></app-topbar>
+    <main class="flex-1 p-7 overflow-y-auto">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Required Documents</h1>
+        <p class="text-gray-500 text-sm mt-1.5">Define which documents employees at your company must upload for verification.</p>
+      </div>
+
+      <!-- Feedback -->
+      <div *ngIf="actionSuccess" class="mb-4 p-3 rounded-xl bg-emerald-50 ring-1 ring-emerald-200/60 text-sm text-emerald-700 font-medium">{{ actionSuccess }}</div>
+      <div *ngIf="actionError" class="mb-4 p-3 rounded-xl bg-red-50 ring-1 ring-red-200/60 text-sm text-red-700 font-medium">{{ actionError }}</div>
+
+      <div class="grid grid-cols-12 gap-6">
+        <!-- List -->
+        <div class="col-span-12 lg:col-span-8">
+          <div class="bg-white/70 rounded-[1.5rem] p-1.5 ring-1 ring-black/[0.04]">
+            <div class="bg-white rounded-[calc(1.5rem-0.375rem)] p-6">
+              <h2 class="text-lg font-bold text-gray-900 tracking-tight mb-5">Current Requirements</h2>
+
+              <div *ngIf="isLoading" class="flex items-center justify-center py-10">
+                <div class="w-8 h-8 border-[3px] border-primary-200 border-t-primary-700 rounded-full animate-spin"></div>
+              </div>
+
+              <div *ngIf="!isLoading">
+                <div *ngIf="docs.length === 0" class="text-center py-8 text-sm text-gray-500">No documents required yet. Add one on the right.</div>
+
+                <div class="space-y-3">
+                  <div *ngFor="let d of docs" class="flex items-center justify-between bg-gray-50/60 rounded-xl px-4 py-3 ring-1 ring-black/[0.03]">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 bg-primary-50 rounded-lg flex items-center justify-center ring-1 ring-primary-100/60">
+                        <svg class="w-4 h-4 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                      </div>
+                      <div>
+                        <p class="text-sm font-semibold text-gray-800">{{ d.label }}</p>
+                        <p class="text-xs text-gray-400 font-mono">{{ d.type }}</p>
+                      </div>
+                    </div>
+                    <button (click)="remove(d)" [disabled]="busyType === d.type"
+                      class="text-sm font-medium text-red-600 hover:text-red-700 transition-colors disabled:opacity-50" title="Remove">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add form -->
+        <div class="col-span-12 lg:col-span-4">
+          <div class="bg-white/70 rounded-[1.5rem] p-1.5 ring-1 ring-black/[0.04]">
+            <div class="bg-white rounded-[calc(1.5rem-0.375rem)] p-6">
+              <h3 class="text-sm font-bold text-gray-900 mb-4">Add a Requirement</h3>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Document Name</label>
+              <input type="text" [(ngModel)]="newLabel" placeholder="e.g. Work Permit"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all mb-4">
+              <button (click)="add()" [disabled]="isSaving"
+                class="w-full py-3 rounded-xl bg-primary-700 text-white text-sm font-semibold hover:bg-primary-800 active:scale-[0.98] transition-all disabled:opacity-60">
+                {{ isSaving ? 'Adding...' : 'Add Document' }}
+              </button>
+              <p class="text-xs text-gray-400 mt-3">Employees will be asked to upload every document in this list before they can be verified.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

@@ -53,9 +53,11 @@ export class DocumentController {
       return;
     }
 
-    const validTypes = ['passport', 'degree', 'employment_letter', 'background_cert', 'photo_id'];
-    if (!validTypes.includes(type)) {
-      res.status(400).json({ success: false, message: 'Invalid document type.' });
+    // Valid types are the ones required by the uploader's company.
+    const user = await Database.getUserById(userId);
+    const requiredDocs = await Database.getRequiredDocuments(user?.companyId);
+    if (!requiredDocs.some(d => d.type === type)) {
+      res.status(400).json({ success: false, message: 'This document is not required for your company.' });
       return;
     }
 

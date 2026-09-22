@@ -23,6 +23,7 @@ import { UserVerificationsComponent } from './pages/user-verifications/user-veri
 import { UserOverviewComponent } from './pages/user-overview/user-overview.component';
 import { UserSettingsComponent } from './pages/user-settings/user-settings.component';
 import { AccessRequestsComponent } from './pages/access-requests/access-requests.component';
+import { RequiredDocumentsComponent } from './pages/required-documents/required-documents.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import { AccessRequestsComponent } from './pages/access-requests/access-requests
     UserVerificationsComponent,
     UserOverviewComponent,
     UserSettingsComponent,
-    AccessRequestsComponent
+    AccessRequestsComponent,
+    RequiredDocumentsComponent
   ],
   imports: [
     BrowserModule,

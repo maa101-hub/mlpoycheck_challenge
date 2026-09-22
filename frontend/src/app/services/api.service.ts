@@ -63,6 +63,19 @@ export class ApiService {
     return this.http.delete(`${this.apiUrl}/users/${id}`, { headers: this.getHeaders() });
   }
 
+  // ─── REQUIRED DOCUMENTS (per company) ───────────────────────────────
+  getRequiredDocuments(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/required-documents`, { headers: this.getHeaders() });
+  }
+
+  addRequiredDocument(payload: { label: string; docType?: string; step?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/required-documents`, payload, { headers: this.getHeaders() });
+  }
+
+  deleteRequiredDocument(docType: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/required-documents/${docType}`, { headers: this.getHeaders() });
+  }
+
   // ─── ACCESS REQUESTS (admin, company-scoped) ────────────────────────
   getAccessRequests(status: string = 'pending'): Observable<any> {
     return this.http.get(`${this.apiUrl}/access-requests?status=${status}`, { headers: this.getHeaders() });
