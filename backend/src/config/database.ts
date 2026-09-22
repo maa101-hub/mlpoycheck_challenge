@@ -429,6 +429,8 @@ export class Database {
     for (const emp of employees) {
       const progress = await this.getVerificationProgress(emp.id);
       const percentage = progress.total > 0 ? Math.round((progress.verified / progress.total) * 100) : 0;
+      const empDocs = await this.getDocuments(emp.id);
+      const rejectedCount = empDocs.filter(d => d.status === 'rejected').length;
       // Overall employee status derived from their documents.
       let overall: 'not_started' | 'in_progress' | 'ready_for_review' | 'verified' = 'not_started';
       if (progress.verified === progress.total && progress.total > 0) overall = 'verified';
@@ -443,6 +445,7 @@ export class Database {
         total: progress.total,
         uploaded: progress.uploaded,
         verified: progress.verified,
+        rejectedCount,
         overall,
         steps: progress.steps,
       });

@@ -16,6 +16,9 @@ router.get('/', authenticate, simulateDelay(), RecordController.getAll);
 // GET /api/records/summary - Get dashboard summary
 router.get('/summary', authenticate, simulateDelay(1000), RecordController.getSummary);
 
+// GET /api/records/employees - Verification list derived from real employees
+router.get('/employees', authenticate, simulateDelay(700), RecordController.getEmployees);
+
 // POST /api/records - Create a new verification record (admin)
 router.post('/', authenticate, authorize('admin'), simulateDelay(800), RecordController.create);
 

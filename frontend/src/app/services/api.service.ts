@@ -34,6 +34,11 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/records/summary`, { headers: this.getHeaders() });
   }
 
+  // Verification list derived from real employees + their document status.
+  getVerificationEmployees(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/records/employees`, { headers: this.getHeaders() });
+  }
+
   createRecord(record: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/records`, record, { headers: this.getHeaders() });
   }
