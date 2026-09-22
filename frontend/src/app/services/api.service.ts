@@ -113,4 +113,21 @@ export class ApiService {
   getFinalReport(): Observable<any> {
     return this.http.get(`${this.apiUrl}/documents/report`, { headers: this.getHeaders() });
   }
+
+  // ─── DOCUMENT REVIEW (admin, company-scoped) ────────────────────────
+  getDocumentReviewList(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/documents/review`, { headers: this.getHeaders() });
+  }
+
+  verifyDocument(docId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/documents/${docId}/verify`, {}, { headers: this.getHeaders() });
+  }
+
+  rejectDocument(docId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/documents/${docId}/reject`, {}, { headers: this.getHeaders() });
+  }
+
+  verifyEmployee(userId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/documents/verify-employee/${userId}`, {}, { headers: this.getHeaders() });
+  }
 }

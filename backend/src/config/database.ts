@@ -390,6 +390,44 @@ export class Database {
     await pool.query('UPDATE documents SET status = $1 WHERE id = $2', [status, id]);
   }
 
+  static async getDocumentById(id: string): Promise<DBDocument | undefined> {
+    const { rows } = await pool.query('SELECT * FROM documents WHERE id = $1', [id]);
+    return rows[0] ? mapDocument(rows[0]) : undefined;
+  }
+
+  /**
+   * For an admin: list the company's approved general employees, each with a
+   * verification-progress summary so the admin knows who needs reviewing.
+   */
+  static async getEmployeesReview(companyId: string): Promise<any[]> {
+    const employees = (await this.getUsersByCompany(companyId))
+      .filter(u => u.role === 'general' && u.status === 'approved');
+
+    const result = [];
+    for (const emp of employees) {
+      const progress = await this.getVerificationProgress(emp.id);
+      const percentage = progress.total > 0 ? Math.round((progress.verified / progress.total) * 100) : 0;
+      // Overall employee status derived from their documents.
+      let overall: 'not_started' | 'in_progress' | 'ready_for_review' | 'verified' = 'not_started';
+      if (progress.verified === progress.total && progress.total > 0) overall = 'verified';
+      else if (progress.uploaded === progress.total && progress.total > 0) overall = 'ready_for_review';
+      else if (progress.uploaded > 0) overall = 'in_progress';
+
+      result.push({
+        id: emp.id,
+        fullName: emp.fullName,
+        email: emp.email,
+        verifiedPercentage: percentage,
+        total: progress.total,
+        uploaded: progress.uploaded,
+        verified: progress.verified,
+        overall,
+        steps: progress.steps,
+      });
+    }
+    return result;
+  }
+
   static async getVerificationProgress(userId: string): Promise<{ total: number; uploaded: number; verified: number; steps: any[] }> {
     // Required documents are now defined per company (falls back to defaults).
     const user = await this.getUserById(userId);

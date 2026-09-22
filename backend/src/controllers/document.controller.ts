@@ -68,7 +68,9 @@ export class DocumentController {
       return;
     }
 
-    // Simulate file upload (in real app, would handle multipart/form-data)
+    // Simulate file upload (in real app, would handle multipart/form-data).
+    // The document stays 'uploaded' (under review) until a company admin
+    // verifies or rejects it — no more automatic verification.
     const doc = await Database.addDocument({
       userId,
       name: fileName,
@@ -77,18 +79,77 @@ export class DocumentController {
       size: `${(Math.random() * 4 + 0.5).toFixed(1)} MB`,
     });
 
-    // Auto-verify after 3 seconds (simulates backend processing)
-    setTimeout(() => {
-      Database.updateDocumentStatus(doc.id, 'verified').catch(err => {
-        console.error('Auto-verify failed:', err);
-      });
-    }, 3000);
-
     res.status(201).json({
       success: true,
-      message: `${fileName} uploaded successfully. Verification in progress.`,
+      message: `${fileName} uploaded successfully. Awaiting admin review.`,
       data: doc,
     });
+  }
+
+  // ─── ADMIN REVIEW ───────────────────────────────────────────────────
+  /**
+   * GET /api/documents/review  (admin)
+   * Lists the admin's company employees with a verification-progress summary.
+   */
+  static async getReviewList(req: AuthRequest, res: Response): Promise<void> {
+    const companyId = req.user?.companyId;
+    if (!companyId) {
+      res.status(400).json({ success: false, message: 'Your account is not linked to a company.' });
+      return;
+    }
+    const employees = await Database.getEmployeesReview(companyId);
+    res.json({ success: true, data: employees, total: employees.length });
+  }
+
+  /** Shared guard: ensure the document belongs to an employee of the admin's company. */
+  private static async ensureSameCompany(req: AuthRequest, res: Response, docId: string): Promise<{ ownerId: string } | null> {
+    const doc = await Database.getDocumentById(docId);
+    if (!doc) {
+      res.status(404).json({ success: false, message: 'Document not found.' });
+      return null;
+    }
+    const owner = await Database.getUserById(doc.userId);
+    if (!owner || owner.companyId !== req.user?.companyId) {
+      res.status(404).json({ success: false, message: 'Document not found.' });
+      return null;
+    }
+    return { ownerId: doc.userId };
+  }
+
+  /** POST /api/documents/:id/verify  (admin) */
+  static async verifyDocument(req: AuthRequest, res: Response): Promise<void> {
+    const ok = await DocumentController.ensureSameCompany(req, res, req.params.id as string);
+    if (!ok) return;
+    await Database.updateDocumentStatus(req.params.id as string, 'verified');
+    res.json({ success: true, message: 'Document verified.' });
+  }
+
+  /** POST /api/documents/:id/reject  (admin) */
+  static async rejectDocument(req: AuthRequest, res: Response): Promise<void> {
+    const ok = await DocumentController.ensureSameCompany(req, res, req.params.id as string);
+    if (!ok) return;
+    await Database.updateDocumentStatus(req.params.id as string, 'rejected');
+    res.json({ success: true, message: 'Document rejected.' });
+  }
+
+  /**
+   * POST /api/documents/verify-employee/:userId  (admin)
+   * Verifies every uploaded (under-review) document for one employee at once.
+   */
+  static async verifyEmployee(req: AuthRequest, res: Response): Promise<void> {
+    const companyId = req.user?.companyId;
+    const targetId = req.params.userId as string;
+    const owner = await Database.getUserById(targetId);
+    if (!owner || owner.companyId !== companyId) {
+      res.status(404).json({ success: false, message: 'Employee not found.' });
+      return;
+    }
+    const docs = await Database.getDocuments(targetId);
+    const toVerify = docs.filter(d => d.status === 'uploaded');
+    for (const d of toVerify) {
+      await Database.updateDocumentStatus(d.id, 'verified');
+    }
+    res.json({ success: true, message: `Verified ${toVerify.length} document(s) for ${owner.fullName}.` });
   }
 
   /**

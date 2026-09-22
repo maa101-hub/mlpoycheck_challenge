@@ -79,6 +79,14 @@ export class UserVerificationsComponent implements OnInit {
     return pending + reviewing;
   }
 
+  get isFullyVerified(): boolean {
+    return this.progress.totalRequired > 0 && this.progress.verified === this.progress.totalRequired;
+  }
+
+  get isUnderReview(): boolean {
+    return !this.isFullyVerified && this.progress.uploaded === this.progress.totalRequired && this.progress.totalRequired > 0;
+  }
+
   navigateTo(route: string): void { this.router.navigate([route]); }
   logout(): void { this.authService.logout(); }
 }
