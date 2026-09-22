@@ -8,7 +8,6 @@ dotenv.config();
  */
 export const config = {
   port: parseInt(process.env.PORT || '3000', 10),
-  mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/mploycheck',
   jwt: {
     secret: process.env.JWT_SECRET || 'default_secret_key',
     expiresIn: process.env.JWT_EXPIRES_IN || '24h',

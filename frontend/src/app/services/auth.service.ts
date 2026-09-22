@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: string;
@@ -28,7 +29,7 @@ export interface LoginResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -45,6 +46,18 @@ export class AuthService {
       }),
       catchError(err => {
         const message = err.error?.message || 'Login failed. Please try again.';
+        return throwError(() => ({ success: false, message }));
+      })
+    );
+  }
+
+  /**
+   * Public self-registration. The backend forces the 'general' role.
+   */
+  register(payload: { fullName: string; companyName: string; email: string; password: string; }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/register`, payload).pipe(
+      catchError(err => {
+        const message = err.error?.message || 'Registration failed. Please try again.';
         return throwError(() => ({ success: false, message }));
       })
     );

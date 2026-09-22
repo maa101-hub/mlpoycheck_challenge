@@ -66,6 +66,15 @@ export class UserController {
     res.status(200).json({ success: true, message: 'User updated.', data: { ...updated, password: undefined } });
   }
 
+  /**
+   * Public self-registration. Always creates a 'general' user —
+   * the role is forced server-side so a caller cannot escalate to admin.
+   */
+  static async register(req: AuthRequest, res: Response): Promise<void> {
+    req.body = { ...req.body, role: 'general' };
+    return UserController.create(req, res);
+  }
+
   static async delete(req: AuthRequest, res: Response): Promise<void> {
     if (req.user && (req.params.id as string) === req.user.id) {
       res.status(400).json({ success: false, message: 'Cannot delete your own account.' });

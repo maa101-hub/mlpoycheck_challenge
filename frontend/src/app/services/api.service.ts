@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 /**
  * API Service - Handles all backend HTTP calls
@@ -10,16 +11,17 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
   private getHeaders(): HttpHeaders {
     const token = this.authService.getToken();
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
+    let headers: { [key: string]: string } = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return new HttpHeaders(headers);
   }
 
   // ─── RECORDS ────────────────────────────────────────────────────────
