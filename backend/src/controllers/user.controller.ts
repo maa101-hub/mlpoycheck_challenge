@@ -34,12 +34,23 @@ export class UserController {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
+      // Admin-created members belong to the admin's own company and are
+      // approved immediately (the admin is adding them directly).
+      const adminCompanyId = req.user?.companyId ?? null;
+      let companyNameForUser = companyName || '';
+      if (adminCompanyId) {
+        const company = await Database.getCompanyById(adminCompanyId);
+        if (company) companyNameForUser = company.name;
+      }
+
       const newUser = await Database.createUser({
         email: email.toLowerCase(),
         password: hashedPassword,
         fullName,
         role: role || 'general',
-        companyName: companyName || '',
+        companyName: companyNameForUser,
+        companyId: adminCompanyId,
+        status: 'approved',
         lastLogin: null,
         isActive: true,
       });
