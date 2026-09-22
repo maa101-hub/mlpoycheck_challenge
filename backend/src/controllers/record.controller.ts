@@ -68,6 +68,48 @@ export class RecordController {
     });
   }
 
+  /**
+   * GET /api/records/employees
+   * The verification list derived from real approved employees + their document
+   * verification progress (single source of truth), rather than manual records.
+   */
+  static async getEmployees(req: AuthRequest, res: Response): Promise<void> {
+    const companyId = req.user?.companyId;
+    if (!companyId) { res.status(200).json({ success: true, data: [], summary: { total: 0, verified: 0, inReview: 0, notStarted: 0, flagged: 0 } }); return; }
+
+    const employees = await Database.getEmployeesReview(companyId);
+
+    const rows = employees.map((e: any) => {
+      // Derive a verification status from the employee's document state.
+      let status: 'verified' | 'pending' | 'flagged';
+      if (e.rejectedCount > 0) status = 'flagged';
+      else if (e.total > 0 && e.verified === e.total) status = 'verified';
+      else status = 'pending';
+
+      return {
+        id: e.id,
+        employeeName: e.fullName,
+        email: e.email,
+        status,
+        verified: e.verified,
+        uploaded: e.uploaded,
+        total: e.total,
+        verifiedPercentage: e.verifiedPercentage,
+        overall: e.overall,
+      };
+    });
+
+    const summary = {
+      total: rows.length,
+      verified: rows.filter(r => r.status === 'verified').length,
+      flagged: rows.filter(r => r.status === 'flagged').length,
+      inReview: rows.filter(r => r.status === 'pending' && r.uploaded > 0).length,
+      notStarted: rows.filter(r => r.uploaded === 0).length,
+    };
+
+    res.status(200).json({ success: true, data: rows, summary });
+  }
+
   private static readonly VALID_STATUSES = ['verified', 'pending', 'flagged', 'rejected'];
   private static readonly VALID_RISKS = ['low', 'medium', 'high', 'critical'];
 
