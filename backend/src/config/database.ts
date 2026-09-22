@@ -18,6 +18,13 @@ const pool = new Pool({
   ssl: config.databaseSsl ? { rejectUnauthorized: false } : undefined,
 });
 
+// Managed Postgres providers (e.g. Neon) drop idle connections. Without a
+// listener, node-postgres would emit an unhandled 'error' event and crash the
+// whole process. Log it instead; the pool creates a fresh connection on demand.
+pool.on('error', (err) => {
+  console.error('Unexpected PostgreSQL idle client error:', err.message);
+});
+
 export interface DBUser {
   id: string;
   email: string;
@@ -540,6 +547,13 @@ export class Database {
         UNIQUE (company_id, doc_type)
       );
     `);
+
+    // Indexes on the columns every request filters by (safe to run repeatedly).
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_company_id ON users (company_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_lower_email ON users (LOWER(email))`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_records_company_id ON records (company_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents (user_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_required_documents_company_id ON required_documents (company_id)`);
   }
 
   /**
