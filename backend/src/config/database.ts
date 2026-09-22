@@ -25,8 +25,17 @@ export interface DBUser {
   fullName: string;
   role: 'admin' | 'general';
   companyName: string;
+  companyId: string | null;
+  status: 'approved' | 'pending' | 'rejected';
   lastLogin: string | null;
   isActive: boolean;
+  createdAt: string;
+}
+
+export interface DBCompany {
+  id: string;
+  name: string;
+  joinCode: string;
   createdAt: string;
 }
 
@@ -60,8 +69,19 @@ function mapUser(r: any): DBUser {
     fullName: r.full_name,
     role: r.role,
     companyName: r.company_name,
+    companyId: r.company_id ?? null,
+    status: r.status ?? 'approved',
     lastLogin: r.last_login ? new Date(r.last_login).toISOString() : null,
     isActive: r.is_active,
+    createdAt: new Date(r.created_at).toISOString(),
+  };
+}
+
+function mapCompany(r: any): DBCompany {
+  return {
+    id: r.id,
+    name: r.name,
+    joinCode: r.join_code,
     createdAt: new Date(r.created_at).toISOString(),
   };
 }
@@ -114,12 +134,27 @@ export class Database {
   static async createUser(user: Omit<DBUser, 'id' | 'createdAt'>): Promise<DBUser> {
     const id = this.generateId();
     const { rows } = await pool.query(
-      `INSERT INTO users (id, email, password, full_name, role, company_name, last_login, is_active, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+      `INSERT INTO users (id, email, password, full_name, role, company_name, company_id, status, last_login, is_active, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
        RETURNING *`,
-      [id, user.email, user.password, user.fullName, user.role, user.companyName, user.lastLogin, user.isActive]
+      [id, user.email, user.password, user.fullName, user.role, user.companyName, user.companyId, user.status, user.lastLogin, user.isActive]
     );
     return mapUser(rows[0]);
+  }
+
+  static async getUsersByCompany(companyId: string, status?: DBUser['status']): Promise<DBUser[]> {
+    if (status) {
+      const { rows } = await pool.query(
+        'SELECT * FROM users WHERE company_id = $1 AND status = $2 ORDER BY created_at DESC',
+        [companyId, status]
+      );
+      return rows.map(mapUser);
+    }
+    const { rows } = await pool.query(
+      'SELECT * FROM users WHERE company_id = $1 ORDER BY created_at DESC',
+      [companyId]
+    );
+    return rows.map(mapUser);
   }
 
   static async updateUser(id: string, updates: Partial<DBUser>): Promise<DBUser | null> {
@@ -130,6 +165,8 @@ export class Database {
       fullName: 'full_name',
       role: 'role',
       companyName: 'company_name',
+      companyId: 'company_id',
+      status: 'status',
       lastLogin: 'last_login',
       isActive: 'is_active',
     };
@@ -159,6 +196,41 @@ export class Database {
   static async deleteUser(id: string): Promise<boolean> {
     const res = await pool.query('DELETE FROM users WHERE id = $1', [id]);
     return (res.rowCount ?? 0) > 0;
+  }
+
+  // ─── COMPANIES ──────────────────────────────────────────────────────
+  static async getCompanyById(id: string): Promise<DBCompany | undefined> {
+    const { rows } = await pool.query('SELECT * FROM companies WHERE id = $1', [id]);
+    return rows[0] ? mapCompany(rows[0]) : undefined;
+  }
+
+  static async getCompanyByJoinCode(code: string): Promise<DBCompany | undefined> {
+    const { rows } = await pool.query('SELECT * FROM companies WHERE UPPER(join_code) = UPPER($1)', [code]);
+    return rows[0] ? mapCompany(rows[0]) : undefined;
+  }
+
+  static async createCompany(name: string): Promise<DBCompany> {
+    const id = this.generateId();
+    // Generate a unique join code (retry on the rare collision).
+    let joinCode = this.generateJoinCode();
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const existing = await this.getCompanyByJoinCode(joinCode);
+      if (!existing) break;
+      joinCode = this.generateJoinCode();
+    }
+    const { rows } = await pool.query(
+      `INSERT INTO companies (id, name, join_code, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *`,
+      [id, name, joinCode]
+    );
+    return mapCompany(rows[0]);
+  }
+
+  static generateJoinCode(): string {
+    // 6-char uppercase alphanumeric, excludes ambiguous chars (0/O, 1/I).
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+    return code;
   }
 
   // ─── RECORDS ────────────────────────────────────────────────────────
@@ -280,6 +352,15 @@ export class Database {
    */
   static async initSchema(): Promise<void> {
     await pool.query(`
+      CREATE TABLE IF NOT EXISTS companies (
+        id         TEXT PRIMARY KEY,
+        name       TEXT NOT NULL,
+        join_code  TEXT UNIQUE NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id           TEXT PRIMARY KEY,
         email        TEXT UNIQUE NOT NULL,
@@ -292,6 +373,11 @@ export class Database {
         created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    // Migrations for databases created before multi-tenant support.
+    // ADD COLUMN IF NOT EXISTS is safe to run on every boot.
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS company_id TEXT`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'approved'`);
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS records (
@@ -329,21 +415,38 @@ export class Database {
     console.log('📦 Seeding database with initial data...');
 
     const salt = await bcrypt.genSalt(10);
+
+    // Seed companies (each with a fixed, memorable join code for the demo).
+    const companies = [
+      { id: this.generateId(), name: 'Mploycheck Corp', joinCode: 'MPLOY1' },
+      { id: this.generateId(), name: 'Enterprise Solutions Inc', joinCode: 'ENTER1' },
+      { id: this.generateId(), name: 'TechCorp Global', joinCode: 'TECHC1' },
+    ];
+    const companyIdByName: Record<string, string> = {};
+    companies.forEach(c => { companyIdByName[c.name] = c.id; });
+
     const seedUsers: Array<Omit<DBUser, 'createdAt'>> = [
-      { id: this.generateId(), email: 'admin@mploycheck.com', password: await bcrypt.hash('Admin@123', salt), fullName: 'Sarah Mitchell', role: 'admin', companyName: 'Mploycheck Corp', lastLogin: null, isActive: true },
-      { id: this.generateId(), email: 'user@mploycheck.com', password: await bcrypt.hash('User@123', salt), fullName: 'James Wilson', role: 'general', companyName: 'Mploycheck Corp', lastLogin: null, isActive: true },
-      { id: this.generateId(), email: 'hr@enterprise.com', password: await bcrypt.hash('Hr@12345', salt), fullName: 'Emily Rodriguez', role: 'general', companyName: 'Enterprise Solutions Inc', lastLogin: null, isActive: true },
-      { id: this.generateId(), email: 'manager@techcorp.com', password: await bcrypt.hash('Manager@1', salt), fullName: 'David Chen', role: 'admin', companyName: 'TechCorp Global', lastLogin: null, isActive: true },
+      { id: this.generateId(), email: 'admin@mploycheck.com', password: await bcrypt.hash('Admin@123', salt), fullName: 'Sarah Mitchell', role: 'admin', companyName: 'Mploycheck Corp', companyId: companyIdByName['Mploycheck Corp'], status: 'approved', lastLogin: null, isActive: true },
+      { id: this.generateId(), email: 'user@mploycheck.com', password: await bcrypt.hash('User@123', salt), fullName: 'James Wilson', role: 'general', companyName: 'Mploycheck Corp', companyId: companyIdByName['Mploycheck Corp'], status: 'approved', lastLogin: null, isActive: true },
+      { id: this.generateId(), email: 'hr@enterprise.com', password: await bcrypt.hash('Hr@12345', salt), fullName: 'Emily Rodriguez', role: 'general', companyName: 'Enterprise Solutions Inc', companyId: companyIdByName['Enterprise Solutions Inc'], status: 'approved', lastLogin: null, isActive: true },
+      { id: this.generateId(), email: 'manager@techcorp.com', password: await bcrypt.hash('Manager@1', salt), fullName: 'David Chen', role: 'admin', companyName: 'TechCorp Global', companyId: companyIdByName['TechCorp Global'], status: 'approved', lastLogin: null, isActive: true },
     ];
 
     const client: PoolClient = await pool.connect();
     try {
       await client.query('BEGIN');
+      for (const c of companies) {
+        await client.query(
+          `INSERT INTO companies (id, name, join_code, created_at) VALUES ($1, $2, $3, NOW())`,
+          [c.id, c.name, c.joinCode]
+        );
+      }
+      console.log(`   ✅ Seeded ${companies.length} companies`);
       for (const u of seedUsers) {
         await client.query(
-          `INSERT INTO users (id, email, password, full_name, role, company_name, last_login, is_active, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
-          [u.id, u.email, u.password, u.fullName, u.role, u.companyName, u.lastLogin, u.isActive]
+          `INSERT INTO users (id, email, password, full_name, role, company_name, company_id, status, last_login, is_active, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+          [u.id, u.email, u.password, u.fullName, u.role, u.companyName, u.companyId, u.status, u.lastLogin, u.isActive]
         );
       }
       console.log(`   ✅ Seeded ${seedUsers.length} users`);

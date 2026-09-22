@@ -10,6 +10,8 @@ export interface User {
   fullName: string;
   role: 'admin' | 'general';
   companyName: string;
+  companyId?: string | null;
+  status?: string;
   lastLogin: string;
 }
 
@@ -52,9 +54,18 @@ export class AuthService {
   }
 
   /**
-   * Public self-registration. The backend forces the 'general' role.
+   * Registration. mode 'company' creates a company and makes the caller its
+   * admin (returns a join code); mode 'join' requests access to an existing
+   * company via its join code (creates a pending member).
    */
-  register(payload: { fullName: string; companyName: string; email: string; password: string; }): Observable<any> {
+  register(payload: {
+    mode: 'company' | 'join';
+    fullName: string;
+    email: string;
+    password: string;
+    companyName?: string;
+    joinCode?: string;
+  }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/register`, payload).pipe(
       catchError(err => {
         const message = err.error?.message || 'Registration failed. Please try again.';

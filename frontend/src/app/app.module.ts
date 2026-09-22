@@ -22,6 +22,7 @@ import { UserDashboardComponent } from './pages/user-dashboard/user-dashboard.co
 import { UserVerificationsComponent } from './pages/user-verifications/user-verifications.component';
 import { UserOverviewComponent } from './pages/user-overview/user-overview.component';
 import { UserSettingsComponent } from './pages/user-settings/user-settings.component';
+import { AccessRequestsComponent } from './pages/access-requests/access-requests.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { UserSettingsComponent } from './pages/user-settings/user-settings.compo
     UserDashboardComponent,
     UserVerificationsComponent,
     UserOverviewComponent,
-    UserSettingsComponent
+    UserSettingsComponent,
+    AccessRequestsComponent
   ],
   imports: [
     BrowserModule,

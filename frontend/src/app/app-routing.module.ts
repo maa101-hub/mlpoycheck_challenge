@@ -14,6 +14,7 @@ import { UserDashboardComponent } from './pages/user-dashboard/user-dashboard.co
 import { UserVerificationsComponent } from './pages/user-verifications/user-verifications.component';
 import { UserOverviewComponent } from './pages/user-overview/user-overview.component';
 import { UserSettingsComponent } from './pages/user-settings/user-settings.component';
+import { AccessRequestsComponent } from './pages/access-requests/access-requests.component';
 import { AuthGuard, AdminGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -25,6 +26,7 @@ const routes: Routes = [
   { path: 'verifications', component: VerificationsComponent, canActivate: [AdminGuard] },
   { path: 'reports', component: ReportsComponent, canActivate: [AdminGuard] },
   { path: 'team', component: TeamComponent, canActivate: [AdminGuard] },
+  { path: 'access-requests', component: AccessRequestsComponent, canActivate: [AdminGuard] },
   { path: 'compliance', component: ComplianceComponent, canActivate: [AdminGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard] },
   { path: 'support', component: SupportComponent, canActivate: [AuthGuard] },

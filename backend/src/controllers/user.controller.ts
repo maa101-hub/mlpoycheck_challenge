@@ -67,15 +67,6 @@ export class UserController {
   }
 
   /**
-   * Public self-registration. Always creates a 'general' user —
-   * the role is forced server-side so a caller cannot escalate to admin.
-   */
-  static async register(req: AuthRequest, res: Response): Promise<void> {
-    req.body = { ...req.body, role: 'general' };
-    return UserController.create(req, res);
-  }
-
-  /**
    * Change the authenticated user's own password.
    * Requires the current password and verifies it before updating.
    */

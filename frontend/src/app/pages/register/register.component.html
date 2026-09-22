@@ -60,9 +60,21 @@
           <div class="bg-white/70 backdrop-blur-sm rounded-[2rem] p-1.5 ring-1 ring-black/[0.04] shadow-[0_8px_40px_-8px_rgba(0,0,0,0.08)]">
             <div class="bg-white rounded-[calc(2rem-0.375rem)] px-8 py-10">
               <!-- Heading -->
-              <div class="mb-8">
+              <div class="mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Create your account</h2>
-                <p class="text-gray-500 text-sm mt-2">Enter your details to start the verification process.</p>
+                <p class="text-gray-500 text-sm mt-2">Register a new company, or join an existing one with a code.</p>
+              </div>
+
+              <!-- Mode Toggle -->
+              <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl mb-6">
+                <button type="button" (click)="setMode('company')"
+                  [class]="mode === 'company' ? 'py-2.5 rounded-lg bg-white text-primary-700 text-sm font-semibold shadow-sm' : 'py-2.5 rounded-lg text-gray-500 text-sm font-medium hover:text-gray-700 transition-colors'">
+                  Register a company
+                </button>
+                <button type="button" (click)="setMode('join')"
+                  [class]="mode === 'join' ? 'py-2.5 rounded-lg bg-white text-primary-700 text-sm font-semibold shadow-sm' : 'py-2.5 rounded-lg text-gray-500 text-sm font-medium hover:text-gray-700 transition-colors'">
+                  Join a company
+                </button>
               </div>
 
               <!-- Form -->
@@ -81,8 +93,8 @@
                   </div>
                 </div>
 
-                <!-- Company Name -->
-                <div class="mb-4">
+                <!-- Company Name (register-a-company mode) -->
+                <div class="mb-4" *ngIf="mode === 'company'">
                   <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
                   <div class="relative">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -93,6 +105,21 @@
                     <input type="text" formControlName="companyName" placeholder="Enter company name"
                       class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-500 ease-premium bg-gray-50/50">
                   </div>
+                </div>
+
+                <!-- Join Code (join-a-company mode) -->
+                <div class="mb-4" *ngIf="mode === 'join'">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Company Join Code</label>
+                  <div class="relative">
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
+                      </svg>
+                    </div>
+                    <input type="text" formControlName="joinCode" placeholder="e.g. MPLOY1" style="text-transform: uppercase"
+                      class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-500 ease-premium bg-gray-50/50 tracking-widest font-mono">
+                  </div>
+                  <p class="text-xs text-gray-400 mt-1.5">Ask your company admin for the join code.</p>
                 </div>
 
                 <!-- Corporate Email -->
@@ -142,10 +169,21 @@
                   </label>
                 </div>
 
+                <!-- Feedback -->
+                <div *ngIf="successMessage" class="mb-4 p-3 rounded-xl bg-emerald-50 ring-1 ring-emerald-200/60 text-sm text-emerald-700 font-medium">{{ successMessage }}</div>
+                <div *ngIf="errorMessage" class="mb-4 p-3 rounded-xl bg-red-50 ring-1 ring-red-200/60 text-sm text-red-700 font-medium">{{ errorMessage }}</div>
+
+                <!-- Generated join code (company mode success) -->
+                <div *ngIf="generatedJoinCode" class="mb-4 p-4 rounded-xl bg-primary-50 ring-1 ring-primary-200/60 text-center">
+                  <p class="text-xs font-semibold text-primary-700 uppercase tracking-wider mb-1">Your Company Join Code</p>
+                  <p class="text-2xl font-bold font-mono tracking-[0.3em] text-primary-800">{{ generatedJoinCode }}</p>
+                  <p class="text-xs text-gray-500 mt-2">Share this with your employees so they can request access.</p>
+                </div>
+
                 <!-- Submit -->
-                <button type="submit" class="w-full bg-primary-800 text-white py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-900 active:scale-[0.98] transition-all duration-500 ease-premium flex items-center justify-center gap-2">
-                  Create Account
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <button type="submit" [disabled]="isLoading" class="w-full bg-primary-800 text-white py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-900 active:scale-[0.98] transition-all duration-500 ease-premium flex items-center justify-center gap-2 disabled:opacity-60">
+                  {{ isLoading ? 'Please wait...' : (mode === 'company' ? 'Create Company Account' : 'Request Access') }}
+                  <svg *ngIf="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                   </svg>
                 </button>
