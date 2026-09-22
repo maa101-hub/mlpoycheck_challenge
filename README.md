@@ -46,7 +46,8 @@ A professional enterprise-grade Employee Verification Management System built wi
 - RxJS Observables for all HTTP operations
 - Reactive Forms with validation
 - Loading spinners and error handling on every API call
-- JSON file-based database (no MongoDB required)
+- PostgreSQL database (Neon-compatible), with automatic schema setup and seeding
+- Multi-tenant: each company is isolated; employees join via a company code and are approved by an admin
 - Modular Angular architecture with services, guards, and shared components
 
 ---
@@ -58,7 +59,7 @@ A professional enterprise-grade Employee Verification Management System built wi
 | Frontend | Angular 14, TypeScript, Tailwind CSS, RxJS |
 | Backend | Node.js, Express 5, TypeScript |
 | Auth | JWT (jsonwebtoken), bcryptjs |
-| Database | JSON file-based (local storage) |
+| Database | PostgreSQL (Neon) via `pg` |
 | Styling | Tailwind CSS 3, Plus Jakarta Sans |
 | Build | Angular CLI, ts-node, nodemon |
 
@@ -101,9 +102,11 @@ mlpoycheck_challenge/
 
 ### Prerequisites
 
-- **Node.js** v16+ installed
+- **Node.js** v18+ installed
 - **npm** v8+ installed
-- No MongoDB required (uses JSON file database)
+- A **PostgreSQL** connection string (e.g. a free [Neon](https://neon.tech) database) set as `DATABASE_URL`
+
+> **Multi-tenant & auth notes:** Register either as a **company** (you become its admin and get a join code) or **join** an existing company with its code (you'll be pending until an admin approves you). A **company email** is required — personal providers (Gmail, Yahoo, Outlook, etc.) are rejected. See `DEPLOYMENT.md` for deploying to Neon + Render + Vercel.
 
 ### 1. Clone the Repository
 

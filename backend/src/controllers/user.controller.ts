@@ -8,13 +8,16 @@ import { AuthRequest } from '../middleware/auth.middleware';
  */
 export class UserController {
   static async getAll(req: AuthRequest, res: Response): Promise<void> {
-    const users = (await Database.getUsers()).map(u => ({ ...u, password: undefined }));
+    const companyId = req.user?.companyId;
+    // Only members of the caller's own company.
+    const list = companyId ? await Database.getUsersByCompany(companyId) : [];
+    const users = list.map(u => ({ ...u, password: undefined }));
     res.status(200).json({ success: true, data: users, total: users.length });
   }
 
   static async getById(req: AuthRequest, res: Response): Promise<void> {
     const user = await Database.getUserById(req.params.id as string);
-    if (!user) { res.status(404).json({ success: false, message: 'User not found.' }); return; }
+    if (!user || user.companyId !== req.user?.companyId) { res.status(404).json({ success: false, message: 'User not found.' }); return; }
     res.status(200).json({ success: true, data: { ...user, password: undefined } });
   }
 
@@ -64,7 +67,7 @@ export class UserController {
   static async update(req: AuthRequest, res: Response): Promise<void> {
     const { fullName, email, role, companyName, isActive } = req.body;
     const user = await Database.getUserById(req.params.id as string);
-    if (!user) { res.status(404).json({ success: false, message: 'User not found.' }); return; }
+    if (!user || user.companyId !== req.user?.companyId) { res.status(404).json({ success: false, message: 'User not found.' }); return; }
 
     const updates: any = {};
     if (fullName) updates.fullName = fullName;
@@ -119,12 +122,40 @@ export class UserController {
   }
 
   static async delete(req: AuthRequest, res: Response): Promise<void> {
-    if (req.user && (req.params.id as string) === req.user.id) {
-      res.status(400).json({ success: false, message: 'Cannot delete your own account.' });
+    const targetId = req.params.id as string;
+    const target = await Database.getUserById(targetId);
+
+    // Cross-tenant safety: can only act on users in your own company.
+    if (!target || target.companyId !== req.user?.companyId) {
+      res.status(404).json({ success: false, message: 'User not found.' });
       return;
     }
-    const deleted = await Database.deleteUser(req.params.id as string);
+
+    const isSelf = targetId === req.user?.id;
+
+    if (isSelf) {
+      // An admin may delete their own account, but not if they are the last
+      // admin — that would leave the company with no administrator.
+      if (target.role === 'admin' && req.user?.companyId) {
+        const adminCount = await Database.countCompanyAdmins(req.user.companyId);
+        if (adminCount <= 1) {
+          res.status(400).json({
+            success: false,
+            message: 'You are the only admin. Promote another admin before deleting your account.',
+          });
+          return;
+        }
+      }
+    } else {
+      // Cannot delete another admin.
+      if (target.role === 'admin') {
+        res.status(403).json({ success: false, message: 'You cannot delete another admin.' });
+        return;
+      }
+    }
+
+    const deleted = await Database.deleteUser(targetId);
     if (!deleted) { res.status(404).json({ success: false, message: 'User not found.' }); return; }
-    res.status(200).json({ success: true, message: 'User deleted.' });
+    res.status(200).json({ success: true, message: isSelf ? 'Your account has been deleted.' : 'User deleted.' });
   }
 }

@@ -41,6 +41,7 @@ export interface DBCompany {
 
 export interface DBRecord {
   id: string;
+  companyId: string | null;
   employeeName: string;
   department: string;
   verificationStatus: 'verified' | 'pending' | 'flagged' | 'rejected';
@@ -108,6 +109,7 @@ function mapCompany(r: any): DBCompany {
 function mapRecord(r: any): DBRecord {
   return {
     id: r.id,
+    companyId: r.company_id ?? null,
     employeeName: r.employee_name,
     department: r.department,
     verificationStatus: r.verification_status,
@@ -159,6 +161,14 @@ export class Database {
       [id, user.email, user.password, user.fullName, user.role, user.companyName, user.companyId, user.status, user.lastLogin, user.isActive]
     );
     return mapUser(rows[0]);
+  }
+
+  static async countCompanyAdmins(companyId: string): Promise<number> {
+    const { rows } = await pool.query(
+      "SELECT COUNT(*)::int AS count FROM users WHERE company_id = $1 AND role = 'admin'",
+      [companyId]
+    );
+    return rows[0]?.count ?? 0;
   }
 
   static async getUsersByCompany(companyId: string, status?: DBUser['status']): Promise<DBUser[]> {
@@ -311,6 +321,11 @@ export class Database {
     return rows.map(mapRecord);
   }
 
+  static async getRecordsByCompany(companyId: string): Promise<DBRecord[]> {
+    const { rows } = await pool.query('SELECT * FROM records WHERE company_id = $1', [companyId]);
+    return rows.map(mapRecord);
+  }
+
   static async getRecordById(id: string): Promise<DBRecord | undefined> {
     const { rows } = await pool.query('SELECT * FROM records WHERE id = $1', [id]);
     return rows[0] ? mapRecord(rows[0]) : undefined;
@@ -319,10 +334,10 @@ export class Database {
   static async createRecord(record: Omit<DBRecord, 'id'>): Promise<DBRecord> {
     const id = this.generateId();
     const { rows } = await pool.query(
-      `INSERT INTO records (id, employee_name, department, verification_status, risk_level, last_updated, employee_id, position)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO records (id, company_id, employee_name, department, verification_status, risk_level, last_updated, employee_id, position)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      [id, record.employeeName, record.department, record.verificationStatus, record.riskLevel, record.lastUpdated, record.employeeId, record.position]
+      [id, record.companyId, record.employeeName, record.department, record.verificationStatus, record.riskLevel, record.lastUpdated, record.employeeId, record.position]
     );
     return mapRecord(rows[0]);
   }
@@ -489,6 +504,7 @@ export class Database {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS records (
         id                  TEXT PRIMARY KEY,
+        company_id          TEXT,
         employee_name       TEXT NOT NULL,
         department          TEXT NOT NULL,
         verification_status TEXT NOT NULL,
@@ -498,6 +514,8 @@ export class Database {
         position            TEXT NOT NULL
       );
     `);
+    // Migration for records created before multi-tenant isolation.
+    await pool.query(`ALTER TABLE records ADD COLUMN IF NOT EXISTS company_id TEXT`);
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS documents (
@@ -571,7 +589,10 @@ export class Database {
       }
       console.log(`   ✅ Seeded ${seedUsers.length} users`);
 
-      const seedRecords: DBRecord[] = [
+      // Seed records belong to the primary demo company (Mploycheck Corp) so the
+      // seeded admin sees data; other companies start with an empty list.
+      const seedRecordsCompanyId = companyIdByName['Mploycheck Corp'];
+      const seedRecords: Omit<DBRecord, 'companyId'>[] = [
         { id: this.generateId(), employeeName: 'Michael Thompson', department: 'Engineering', verificationStatus: 'verified', riskLevel: 'low', lastUpdated: '2024-03-15', employeeId: 'EMP-001', position: 'Senior Software Engineer' },
         { id: this.generateId(), employeeName: 'Jessica Martinez', department: 'Finance', verificationStatus: 'verified', riskLevel: 'low', lastUpdated: '2024-03-14', employeeId: 'EMP-002', position: 'Financial Analyst' },
         { id: this.generateId(), employeeName: 'Robert Johnson', department: 'Operations', verificationStatus: 'pending', riskLevel: 'medium', lastUpdated: '2024-03-13', employeeId: 'EMP-003', position: 'Operations Manager' },
@@ -595,9 +616,9 @@ export class Database {
       ];
       for (const r of seedRecords) {
         await client.query(
-          `INSERT INTO records (id, employee_name, department, verification_status, risk_level, last_updated, employee_id, position)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [r.id, r.employeeName, r.department, r.verificationStatus, r.riskLevel, r.lastUpdated, r.employeeId, r.position]
+          `INSERT INTO records (id, company_id, employee_name, department, verification_status, risk_level, last_updated, employee_id, position)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [r.id, seedRecordsCompanyId, r.employeeName, r.department, r.verificationStatus, r.riskLevel, r.lastUpdated, r.employeeId, r.position]
         );
       }
       await client.query('COMMIT');
