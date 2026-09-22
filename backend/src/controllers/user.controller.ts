@@ -8,12 +8,12 @@ import { AuthRequest } from '../middleware/auth.middleware';
  */
 export class UserController {
   static async getAll(req: AuthRequest, res: Response): Promise<void> {
-    const users = Database.getUsers().map(u => ({ ...u, password: undefined }));
+    const users = (await Database.getUsers()).map(u => ({ ...u, password: undefined }));
     res.status(200).json({ success: true, data: users, total: users.length });
   }
 
   static async getById(req: AuthRequest, res: Response): Promise<void> {
-    const user = Database.getUserById(req.params.id as string);
+    const user = await Database.getUserById(req.params.id as string);
     if (!user) { res.status(404).json({ success: false, message: 'User not found.' }); return; }
     res.status(200).json({ success: true, data: { ...user, password: undefined } });
   }
@@ -26,7 +26,7 @@ export class UserController {
         return;
       }
 
-      if (Database.getUserByEmail(email)) {
+      if (await Database.getUserByEmail(email)) {
         res.status(409).json({ success: false, message: 'User with this email already exists.' });
         return;
       }
@@ -34,7 +34,7 @@ export class UserController {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      const newUser = Database.createUser({
+      const newUser = await Database.createUser({
         email: email.toLowerCase(),
         password: hashedPassword,
         fullName,
@@ -52,7 +52,7 @@ export class UserController {
 
   static async update(req: AuthRequest, res: Response): Promise<void> {
     const { fullName, email, role, companyName, isActive } = req.body;
-    const user = Database.getUserById(req.params.id as string);
+    const user = await Database.getUserById(req.params.id as string);
     if (!user) { res.status(404).json({ success: false, message: 'User not found.' }); return; }
 
     const updates: any = {};
@@ -62,7 +62,7 @@ export class UserController {
     if (companyName !== undefined) updates.companyName = companyName;
     if (isActive !== undefined) updates.isActive = isActive;
 
-    const updated = Database.updateUser(req.params.id as string, updates);
+    const updated = await Database.updateUser(req.params.id as string, updates);
     res.status(200).json({ success: true, message: 'User updated.', data: { ...updated, password: undefined } });
   }
 
@@ -94,7 +94,7 @@ export class UserController {
         return;
       }
 
-      const user = Database.getUserById(userId);
+      const user = await Database.getUserById(userId);
       if (!user) {
         res.status(404).json({ success: false, message: 'User not found.' });
         return;
@@ -108,7 +108,7 @@ export class UserController {
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(newPassword, salt);
-      Database.updateUser(userId, { password: hashedPassword });
+      await Database.updateUser(userId, { password: hashedPassword });
 
       res.status(200).json({ success: true, message: 'Password updated successfully.' });
     } catch (error) {
@@ -121,7 +121,7 @@ export class UserController {
       res.status(400).json({ success: false, message: 'Cannot delete your own account.' });
       return;
     }
-    const deleted = Database.deleteUser(req.params.id as string);
+    const deleted = await Database.deleteUser(req.params.id as string);
     if (!deleted) { res.status(404).json({ success: false, message: 'User not found.' }); return; }
     res.status(200).json({ success: true, message: 'User deleted.' });
   }

@@ -12,7 +12,7 @@ export class DocumentController {
    */
   static async getMyDocuments(req: AuthRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
-    const docs = Database.getDocuments(userId);
+    const docs = await Database.getDocuments(userId);
     res.json({ success: true, data: docs });
   }
 
@@ -21,7 +21,7 @@ export class DocumentController {
    */
   static async getProgress(req: AuthRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
-    const progress = Database.getVerificationProgress(userId);
+    const progress = await Database.getVerificationProgress(userId);
     const percentage = progress.total > 0 ? Math.round((progress.uploaded / progress.total) * 100) : 0;
 
     // Final report available only when all docs are uploaded
@@ -60,14 +60,14 @@ export class DocumentController {
     }
 
     // Check if already uploaded
-    const existing = Database.getDocuments(userId).find(d => d.type === type);
+    const existing = (await Database.getDocuments(userId)).find(d => d.type === type);
     if (existing) {
       res.status(409).json({ success: false, message: 'This document type has already been uploaded.' });
       return;
     }
 
     // Simulate file upload (in real app, would handle multipart/form-data)
-    const doc = Database.addDocument({
+    const doc = await Database.addDocument({
       userId,
       name: fileName,
       type: type as any,
@@ -77,14 +77,9 @@ export class DocumentController {
 
     // Auto-verify after 3 seconds (simulates backend processing)
     setTimeout(() => {
-      const docs = Database.getDocuments();
-      const idx = docs.findIndex(d => d.id === doc.id);
-      if (idx !== -1) {
-        docs[idx].status = 'verified';
-        const fs = require('fs');
-        const path = require('path');
-        fs.writeFileSync(path.join(__dirname, '../../data/documents.json'), JSON.stringify(docs, null, 2));
-      }
+      Database.updateDocumentStatus(doc.id, 'verified').catch(err => {
+        console.error('Auto-verify failed:', err);
+      });
     }, 3000);
 
     res.status(201).json({
@@ -99,7 +94,7 @@ export class DocumentController {
    */
   static async getFinalReport(req: AuthRequest, res: Response): Promise<void> {
     const userId = req.user!.id;
-    const progress = Database.getVerificationProgress(userId);
+    const progress = await Database.getVerificationProgress(userId);
 
     if (progress.uploaded < progress.total) {
       res.status(403).json({
@@ -109,7 +104,7 @@ export class DocumentController {
       return;
     }
 
-    const user = Database.getUserById(userId);
+    const user = await Database.getUserById(userId);
     res.json({
       success: true,
       data: {
