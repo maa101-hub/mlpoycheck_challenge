@@ -63,6 +63,19 @@ export class ApiService {
     return this.http.delete(`${this.apiUrl}/users/${id}`, { headers: this.getHeaders() });
   }
 
+  // ─── ACCESS REQUESTS (admin, company-scoped) ────────────────────────
+  getAccessRequests(status: string = 'pending'): Observable<any> {
+    return this.http.get(`${this.apiUrl}/access-requests?status=${status}`, { headers: this.getHeaders() });
+  }
+
+  approveAccessRequest(id: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/access-requests/${id}/approve`, {}, { headers: this.getHeaders() });
+  }
+
+  rejectAccessRequest(id: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/access-requests/${id}/reject`, {}, { headers: this.getHeaders() });
+  }
+
   changePassword(currentPassword: string, newPassword: string): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/users/change-password`,
