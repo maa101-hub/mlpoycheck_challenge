@@ -34,6 +34,18 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/records/summary`, { headers: this.getHeaders() });
   }
 
+  createRecord(record: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/records`, record, { headers: this.getHeaders() });
+  }
+
+  updateRecord(id: string, record: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/records/${id}`, record, { headers: this.getHeaders() });
+  }
+
+  deleteRecord(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/records/${id}`, { headers: this.getHeaders() });
+  }
+
   // ─── USERS ──────────────────────────────────────────────────────────
   getUsers(): Observable<any> {
     return this.http.get(`${this.apiUrl}/users`, { headers: this.getHeaders() });
