@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { config } from '../config';
 import { Database } from '../config/database';
+import { isCorporateEmail, CORPORATE_EMAIL_MESSAGE } from '../utils/email';
 
 /**
  * Auth Controller - login + multi-tenant registration.
@@ -14,6 +15,11 @@ export class AuthController {
 
       if (!email || !password) {
         res.status(400).json({ success: false, message: 'Email and password are required.' });
+        return;
+      }
+
+      if (!isCorporateEmail(email)) {
+        res.status(400).json({ success: false, message: CORPORATE_EMAIL_MESSAGE });
         return;
       }
 
@@ -88,6 +94,10 @@ export class AuthController {
 
       if (!fullName || !email || !password) {
         res.status(400).json({ success: false, message: 'Full name, email, and password are required.' });
+        return;
+      }
+      if (!isCorporateEmail(email)) {
+        res.status(400).json({ success: false, message: CORPORATE_EMAIL_MESSAGE });
         return;
       }
       if (typeof password !== 'string' || password.length < 8) {

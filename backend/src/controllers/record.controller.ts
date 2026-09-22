@@ -7,9 +7,13 @@ import { AuthRequest } from '../middleware/auth.middleware';
  */
 export class RecordController {
   static async getAll(req: AuthRequest, res: Response): Promise<void> {
+    const companyId = req.user?.companyId;
+    if (!companyId) { res.status(200).json({ success: true, data: [], pagination: { total: 0, page: 1, limit: 10, totalPages: 0, hasNext: false, hasPrev: false } }); return; }
+
     const { search, status, riskLevel, sortBy = 'lastUpdated', sortOrder = 'desc', page = '1', limit = '10' } = req.query;
 
-    let records = await Database.getRecords();
+    // Only this company's records.
+    let records = await Database.getRecordsByCompany(companyId);
 
     // Search filter
     if (search) {
@@ -50,7 +54,8 @@ export class RecordController {
   }
 
   static async getSummary(req: AuthRequest, res: Response): Promise<void> {
-    const records = await Database.getRecords();
+    const companyId = req.user?.companyId;
+    const records = companyId ? await Database.getRecordsByCompany(companyId) : [];
     res.status(200).json({
       success: true,
       data: {
@@ -91,6 +96,7 @@ export class RecordController {
       }
 
       const record = await Database.createRecord({
+        companyId: req.user?.companyId ?? null,
         employeeName,
         department,
         employeeId,
@@ -110,7 +116,8 @@ export class RecordController {
     try {
       const id = req.params.id as string;
       const existing = await Database.getRecordById(id);
-      if (!existing) { res.status(404).json({ success: false, message: 'Record not found.' }); return; }
+      // 404 if missing or belongs to another company (no cross-tenant access).
+      if (!existing || existing.companyId !== req.user?.companyId) { res.status(404).json({ success: false, message: 'Record not found.' }); return; }
 
       const { employeeName, department, employeeId, position, verificationStatus, riskLevel } = req.body;
       const updates: any = { lastUpdated: RecordController.today() };
@@ -142,8 +149,13 @@ export class RecordController {
   }
 
   static async remove(req: AuthRequest, res: Response): Promise<void> {
-    const deleted = await Database.deleteRecord(req.params.id as string);
-    if (!deleted) { res.status(404).json({ success: false, message: 'Record not found.' }); return; }
+    const id = req.params.id as string;
+    const existing = await Database.getRecordById(id);
+    if (!existing || existing.companyId !== req.user?.companyId) {
+      res.status(404).json({ success: false, message: 'Record not found.' });
+      return;
+    }
+    await Database.deleteRecord(id);
     res.status(200).json({ success: true, message: 'Record deleted.' });
   }
 }
