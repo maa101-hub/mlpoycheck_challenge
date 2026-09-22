@@ -80,7 +80,21 @@ export class SettingsComponent implements OnInit {
       this.passwordError = 'Please fill both fields (min 6 chars for new password).';
       return;
     }
-    this.passwordSuccess = 'Password updated successfully.';
-    this.passwordForm.reset();
+    this.passwordSuccess = '';
+    this.passwordError = '';
+    this.isSaving = true;
+
+    const { currentPassword, newPassword } = this.passwordForm.value;
+    this.apiService.changePassword(currentPassword, newPassword).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.passwordSuccess = 'Password updated successfully.';
+        this.passwordForm.reset();
+      },
+      error: (err) => {
+        this.isSaving = false;
+        this.passwordError = err.error?.message || 'Failed to update password.';
+      }
+    });
   }
 }

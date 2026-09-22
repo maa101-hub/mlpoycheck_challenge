@@ -72,13 +72,45 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+  /**
+   * Decode the JWT payload (base64url) without verifying the signature.
+   * Signature verification is the backend's job; this is only used to read
+   * claims like `role` on the client. Returns null if the token is malformed.
+   */
+  private decodeToken(): { id?: string; email?: string; role?: string; exp?: number } | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) return null;
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
   }
 
+  isAuthenticated(): boolean {
+    const claims = this.decodeToken();
+    if (!claims) return false;
+    // Treat an expired token as not authenticated.
+    if (claims.exp && claims.exp * 1000 <= Date.now()) return false;
+    return true;
+  }
+
+  /**
+   * Role is read from the JWT claims (source of truth), falling back to the
+   * stored user object only if the token can't be decoded.
+   */
   isAdmin(): boolean {
-    const user = this.getUser();
-    return user?.role === 'admin';
+    const role = this.decodeToken()?.role ?? this.getUser()?.role;
+    return role === 'admin';
   }
 
   logout(): void {

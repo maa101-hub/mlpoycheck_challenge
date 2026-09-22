@@ -75,6 +75,47 @@ export class UserController {
     return UserController.create(req, res);
   }
 
+  /**
+   * Change the authenticated user's own password.
+   * Requires the current password and verifies it before updating.
+   */
+  static async changePassword(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        res.status(400).json({ success: false, message: 'Current and new password are required.' });
+        return;
+      }
+
+      if (typeof newPassword !== 'string' || newPassword.length < 6) {
+        res.status(400).json({ success: false, message: 'New password must be at least 6 characters.' });
+        return;
+      }
+
+      const user = Database.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ success: false, message: 'User not found.' });
+        return;
+      }
+
+      const isValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isValid) {
+        res.status(401).json({ success: false, message: 'Current password is incorrect.' });
+        return;
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      Database.updateUser(userId, { password: hashedPassword });
+
+      res.status(200).json({ success: true, message: 'Password updated successfully.' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Failed to update password.' });
+    }
+  }
+
   static async delete(req: AuthRequest, res: Response): Promise<void> {
     if (req.user && (req.params.id as string) === req.user.id) {
       res.status(400).json({ success: false, message: 'Cannot delete your own account.' });
