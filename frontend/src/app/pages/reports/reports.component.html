@@ -22,25 +22,26 @@
           </button>
         </div>
 
-        <!-- Stats Row -->
+        <!-- Stats Row (live verification data) -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-7">
           <div class="bg-white rounded-xl p-5 ring-1 ring-black/[0.04]">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Reports</p>
-            <p class="text-2xl font-bold text-gray-900 mt-1">47</p>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Records</p>
+            <p class="text-2xl font-bold text-gray-900 mt-1">{{ totalRecords }}</p>
           </div>
           <div class="bg-white rounded-xl p-5 ring-1 ring-black/[0.04]">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">This Month</p>
-            <p class="text-2xl font-bold text-gray-900 mt-1">12</p>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Verified</p>
+            <p class="text-2xl font-bold text-emerald-600 mt-1">{{ verified }}</p>
           </div>
           <div class="bg-white rounded-xl p-5 ring-1 ring-black/[0.04]">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Scheduled</p>
-            <p class="text-2xl font-bold text-primary-700 mt-1">3</p>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
+            <p class="text-2xl font-bold text-primary-700 mt-1">{{ pending }}</p>
           </div>
           <div class="bg-white rounded-xl p-5 ring-1 ring-black/[0.04]">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Storage Used</p>
-            <p class="text-2xl font-bold text-gray-900 mt-1">128 MB</p>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Flagged / Rejected</p>
+            <p class="text-2xl font-bold text-red-600 mt-1">{{ flagged + rejected }}</p>
           </div>
         </div>
+        <div *ngIf="statsError" class="mb-7 p-3 rounded-xl bg-red-50 ring-1 ring-red-200/60 text-sm text-red-700 font-medium">{{ statsError }}</div>
 
         <!-- Reports Table -->
         <div class="bg-white/70 rounded-[1.5rem] p-1.5 ring-1 ring-black/[0.04]">
