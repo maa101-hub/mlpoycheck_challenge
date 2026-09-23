@@ -1,7 +1,7 @@
 <div class="flex min-h-screen bg-[#f8f9fb]">
   <!-- Sidebar -->
   <aside class="fixed left-0 top-0 h-screen w-[200px] bg-white border-r border-gray-100 flex flex-col z-40">
-    <div class="px-5 pt-6 pb-4"><span class="text-base font-bold text-primary-700 tracking-tight block leading-tight">Mploycheck</span><span class="text-[10px] text-gray-400 font-medium">Verification Secure</span></div>
+    <div class="px-5 pt-6 pb-4 flex items-center gap-2.5"><img src="assets/image1.png" alt="Mploycheck" class="w-8 h-8 rounded-lg object-contain flex-shrink-0"><div><span class="text-base font-bold text-primary-700 tracking-tight block leading-tight">Mploycheck</span><span class="text-[10px] text-gray-400 font-medium">Verification Secure</span></div></div>
     <nav class="flex-1 px-3 mt-4">
       <ul class="space-y-1">
         <li><button (click)="navigateTo('/user-overview')" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 font-medium text-sm">
@@ -26,7 +26,7 @@
   <!-- Main -->
   <div class="flex-1 ml-[200px] flex flex-col">
     <header class="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-6">
-      <span class="text-base font-bold text-primary-700">Mploycheck</span>
+      <span class="flex items-center gap-2"><img src="assets/image1.png" alt="Mploycheck" class="w-6 h-6 rounded object-contain"><span class="text-base font-bold text-primary-700 tracking-tight">Mploycheck</span></span>
       <div class="flex items-center gap-6">
         <button (click)="navigateTo('/user-overview')" class="text-sm text-gray-500 font-medium hover:text-gray-900">Dashboard</button>
         <button (click)="navigateTo('/user-verifications')" class="text-sm text-gray-500 font-medium hover:text-gray-900">My Progress</button>
