@@ -12,6 +12,7 @@ import { UserDashboardComponent } from './pages/user-dashboard/user-dashboard.co
 import { UserVerificationsComponent } from './pages/user-verifications/user-verifications.component';
 import { UserOverviewComponent } from './pages/user-overview/user-overview.component';
 import { UserSettingsComponent } from './pages/user-settings/user-settings.component';
+import { UserHelpComponent } from './pages/user-help/user-help.component';
 import { AccessRequestsComponent } from './pages/access-requests/access-requests.component';
 import { RequiredDocumentsComponent } from './pages/required-documents/required-documents.component';
 import { DocumentReviewComponent } from './pages/document-review/document-review.component';
@@ -35,6 +36,7 @@ const routes: Routes = [
   { path: 'user-profile', component: UserDashboardComponent, canActivate: [AuthGuard] },
   { path: 'user-verifications', component: UserVerificationsComponent, canActivate: [AuthGuard] },
   { path: 'user-settings', component: UserSettingsComponent, canActivate: [AuthGuard] },
+  { path: 'user-help', component: UserHelpComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '' }
 ];
 
