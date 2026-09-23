@@ -119,6 +119,11 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/documents/report`, { headers: this.getHeaders() });
   }
 
+  // The caller's own company info + admin contacts (for the Help Center).
+  getMyCompanyInfo(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/company/me`, { headers: this.getHeaders() });
+  }
+
   // ─── DOCUMENT REVIEW (admin, company-scoped) ────────────────────────
   getDocumentReviewList(): Observable<any> {
     return this.http.get(`${this.apiUrl}/documents/review`, { headers: this.getHeaders() });

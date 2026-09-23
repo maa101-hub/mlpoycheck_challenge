@@ -24,6 +24,7 @@ import { UserSettingsComponent } from './pages/user-settings/user-settings.compo
 import { AccessRequestsComponent } from './pages/access-requests/access-requests.component';
 import { RequiredDocumentsComponent } from './pages/required-documents/required-documents.component';
 import { DocumentReviewComponent } from './pages/document-review/document-review.component';
+import { UserHelpComponent } from './pages/user-help/user-help.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { DocumentReviewComponent } from './pages/document-review/document-review
     UserSettingsComponent,
     AccessRequestsComponent,
     RequiredDocumentsComponent,
-    DocumentReviewComponent
+    DocumentReviewComponent,
+    UserHelpComponent
   ],
   imports: [
     BrowserModule,
